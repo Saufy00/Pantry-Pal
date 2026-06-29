@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db, itemsTable } from "@workspace/db";
 import type { InsertItem } from "@workspace/db";
 
@@ -24,24 +24,11 @@ export async function listItems(filter: ListItemsFilter = {}) {
   if (location) conditions.push(eq(itemsTable.location, location));
   if (status) conditions.push(eq(itemsTable.status, status));
 
-  const base = db.select().from(itemsTable);
-  const ordered = conditions.length === 0
-    ? base.orderBy(itemsTable.location, itemsTable.category, itemsTable.name)
-    : conditions.length === 1
-      ? base.where(conditions[0]).orderBy(itemsTable.location, itemsTable.category, itemsTable.name)
-      : base.where(sql`${conditions.map((_, i) => `$${i + 1}`).join(" AND ")}`).orderBy(itemsTable.location, itemsTable.category, itemsTable.name);
+  const query = db.select().from(itemsTable);
 
-  // Simpler approach for multi-condition filtering
-  if (conditions.length === 0) {
-    return db.select().from(itemsTable).orderBy(itemsTable.location, itemsTable.category, itemsTable.name);
-  }
-  if (conditions.length === 1) {
-    return db.select().from(itemsTable).where(conditions[0]).orderBy(itemsTable.location, itemsTable.category, itemsTable.name);
-  }
-  if (conditions.length === 2) {
-    return db.select().from(itemsTable).where(sql`${conditions[0]} AND ${conditions[1]}`).orderBy(itemsTable.location, itemsTable.category, itemsTable.name);
-  }
-  return db.select().from(itemsTable).where(sql`${conditions[0]} AND ${conditions[1]} AND ${conditions[2]}`).orderBy(itemsTable.location, itemsTable.category, itemsTable.name);
+  return conditions.length > 0
+    ? query.where(and(...conditions)).orderBy(itemsTable.location, itemsTable.category, itemsTable.name)
+    : query.orderBy(itemsTable.location, itemsTable.category, itemsTable.name);
 }
 
 export async function getItemById(id: number) {
