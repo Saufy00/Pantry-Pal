@@ -1,0 +1,397 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Home Stock Tracker API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: items
+    description: Pantry/stock item operations
+  - name: summary
+    description: Summary and aggregation operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /items:
+    get:
+      operationId: listItems
+      tags: [items]
+      summary: List all stock items
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [in_stock, low, out]
+      responses:
+        "200":
+          description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+    post:
+      operationId: createItem
+      tags: [items]
+      summary: Add a new stock item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+
+  /items/summary:
+    get:
+      operationId: getItemsSummary
+      tags: [summary]
+      summary: Get stock summary counts
+      responses:
+        "200":
+          description: Summary of item counts by status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemsSummary"
+
+  /items/needs-restock:
+    get:
+      operationId: getNeedsRestock
+      tags: [summary]
+      summary: Get items that are low or out of stock
+      responses:
+        "200":
+          description: Items needing restock
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+
+  /items/categories:
+    get:
+      operationId: listCategories
+      tags: [summary]
+      summary: List all categories with item counts
+      responses:
+        "200":
+          description: Categories with counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryCount"
+
+  /items/locations:
+    get:
+      operationId: listLocations
+      tags: [summary]
+      summary: List all storage locations with item counts
+      responses:
+        "200":
+          description: Locations with counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LocationCount"
+
+  /items/{id}:
+    get:
+      operationId: getItem
+      tags: [items]
+      summary: Get a single stock item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Item found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateItem
+      tags: [items]
+      summary: Update a stock item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemUpdate"
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteItem
+      tags: [items]
+      summary: Delete a stock item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /items/{id}/status:
+    patch:
+      operationId: updateItemStatus
+      tags: [items]
+      summary: Quickly update item status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusUpdate"
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: Not found
+
+  /items/{id}/quantity:
+    patch:
+      operationId: adjustItemQuantity
+      tags: [items]
+      summary: Increment or decrement item quantity by a delta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuantityAdjust"
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: Not found
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Item:
+      type: object
+      required: [id, name, category, location, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+          enum: [in_stock, low, out]
+        quantity:
+          type: ["string", "null"]
+        unit:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        updatedBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ItemInput:
+      type: object
+      required: [name, category, status]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          minLength: 1
+        location:
+          type: string
+        status:
+          type: string
+          enum: [in_stock, low, out]
+        quantity:
+          type: string
+        unit:
+          type: string
+        notes:
+          type: string
+        updatedBy:
+          type: string
+
+    ItemUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        category:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+          enum: [in_stock, low, out]
+        quantity:
+          type: string
+        unit:
+          type: string
+        notes:
+          type: string
+        updatedBy:
+          type: string
+
+    StatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [in_stock, low, out]
+        updatedBy:
+          type: string
+
+    QuantityAdjust:
+      type: object
+      required: [delta]
+      properties:
+        delta:
+          type: integer
+          description: Amount to add (positive) or subtract (negative) from current quantity
+
+    ItemsSummary:
+      type: object
+      required: [total, inStock, low, out]
+      properties:
+        total:
+          type: integer
+        inStock:
+          type: integer
+        low:
+          type: integer
+        out:
+          type: integer
+
+    CategoryCount:
+      type: object
+      required: [category, total, inStock, low, out]
+      properties:
+        category:
+          type: string
+        total:
+          type: integer
+        inStock:
+          type: integer
+        low:
+          type: integer
+        out:
+          type: integer
+
+    LocationCount:
+      type: object
+      required: [location, total, inStock, low, out]
+      properties:
+        location:
+          type: string
+        total:
+          type: integer
+        inStock:
+          type: integer
+        low:
+          type: integer
+        out:
+          type: integer
