@@ -14,6 +14,7 @@ export interface ItemUpdate {
     status?: ItemUpdateStatus;
     quantity?: string;
     unit?: string;
+    minThreshold?: number;
     notes?: string;
     updatedBy?: string;
     expirationDate?: Date;

@@ -7,6 +7,7 @@ import Dashboard from "@/pages/dashboard";
 import Items from "@/pages/items";
 import NewItem from "@/pages/new-item";
 import ItemDetail from "@/pages/item-detail";
+import Shopping from "@/pages/shopping";
 import PrivacyPolicy from "@/pages/privacy";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useOfflineQueue } from "@/hooks/useOfflineQueue";
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/items/new" component={NewItem} />
       <Route path="/items/:id" component={ItemDetail} />
       <Route path="/items" component={Items} />
+      <Route path="/shopping" component={Shopping} />
       <Route component={NotFound} />
     </Switch>
   );

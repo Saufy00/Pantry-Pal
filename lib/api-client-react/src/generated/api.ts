@@ -29,6 +29,9 @@ import type {
   ListItemsParams,
   LocationCount,
   QuantityAdjust,
+  ShoppingItem,
+  ShoppingItemInput,
+  ShoppingItemUpdate,
   StatusUpdate
 } from './api.schemas';
 
@@ -957,5 +960,293 @@ export const useAdjustItemQuantity = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getAdjustItemQuantityMutationOptions(options));
+    }
+
+export const getListShoppingItemsUrl = () => {
+
+
+
+
+  return `/api/shopping`
+}
+
+/**
+ * @summary List custom shopping list items
+ */
+export const listShoppingItems = async ( options?: RequestInit): Promise<ShoppingItem[]> => {
+
+  return customFetch<ShoppingItem[]>(getListShoppingItemsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListShoppingItemsQueryKey = () => {
+    return [
+    `/api/shopping`
+    ] as const;
+    }
+
+
+export const getListShoppingItemsQueryOptions = <TData = Awaited<ReturnType<typeof listShoppingItems>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listShoppingItems>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListShoppingItemsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listShoppingItems>>> = ({ signal }) => listShoppingItems({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listShoppingItems>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListShoppingItemsQueryResult = NonNullable<Awaited<ReturnType<typeof listShoppingItems>>>
+export type ListShoppingItemsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List custom shopping list items
+ */
+
+export function useListShoppingItems<TData = Awaited<ReturnType<typeof listShoppingItems>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listShoppingItems>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListShoppingItemsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateShoppingItemUrl = () => {
+
+
+
+
+  return `/api/shopping`
+}
+
+/**
+ * @summary Add a new custom shopping list item
+ */
+export const createShoppingItem = async (shoppingItemInput: ShoppingItemInput, options?: RequestInit): Promise<ShoppingItem> => {
+
+  return customFetch<ShoppingItem>(getCreateShoppingItemUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(shoppingItemInput)
+  }
+);}
+
+
+
+
+export const getCreateShoppingItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createShoppingItem>>, TError,{data: BodyType<ShoppingItemInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createShoppingItem>>, TError,{data: BodyType<ShoppingItemInput>}, TContext> => {
+
+const mutationKey = ['createShoppingItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createShoppingItem>>, {data: BodyType<ShoppingItemInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createShoppingItem(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateShoppingItemMutationResult = NonNullable<Awaited<ReturnType<typeof createShoppingItem>>>
+    export type CreateShoppingItemMutationBody = BodyType<ShoppingItemInput>
+    export type CreateShoppingItemMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Add a new custom shopping list item
+ */
+export const useCreateShoppingItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createShoppingItem>>, TError,{data: BodyType<ShoppingItemInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createShoppingItem>>,
+        TError,
+        {data: BodyType<ShoppingItemInput>},
+        TContext
+      > => {
+      return useMutation(getCreateShoppingItemMutationOptions(options));
+    }
+
+export const getUpdateShoppingItemUrl = (id: number,) => {
+
+
+
+
+  return `/api/shopping/${id}`
+}
+
+/**
+ * @summary Update a shopping list item
+ */
+export const updateShoppingItem = async (id: number,
+    shoppingItemUpdate: ShoppingItemUpdate, options?: RequestInit): Promise<ShoppingItem> => {
+
+  return customFetch<ShoppingItem>(getUpdateShoppingItemUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(shoppingItemUpdate)
+  }
+);}
+
+
+
+
+export const getUpdateShoppingItemMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateShoppingItem>>, TError,{id: number;data: BodyType<ShoppingItemUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateShoppingItem>>, TError,{id: number;data: BodyType<ShoppingItemUpdate>}, TContext> => {
+
+const mutationKey = ['updateShoppingItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateShoppingItem>>, {id: number;data: BodyType<ShoppingItemUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateShoppingItem(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateShoppingItemMutationResult = NonNullable<Awaited<ReturnType<typeof updateShoppingItem>>>
+    export type UpdateShoppingItemMutationBody = BodyType<ShoppingItemUpdate>
+    export type UpdateShoppingItemMutationError = ErrorType<void>
+
+    /**
+ * @summary Update a shopping list item
+ */
+export const useUpdateShoppingItem = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateShoppingItem>>, TError,{id: number;data: BodyType<ShoppingItemUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateShoppingItem>>,
+        TError,
+        {id: number;data: BodyType<ShoppingItemUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateShoppingItemMutationOptions(options));
+    }
+
+export const getDeleteShoppingItemUrl = (id: number,) => {
+
+
+
+
+  return `/api/shopping/${id}`
+}
+
+/**
+ * @summary Delete a shopping list item
+ */
+export const deleteShoppingItem = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteShoppingItemUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteShoppingItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteShoppingItem>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteShoppingItem>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteShoppingItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteShoppingItem>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteShoppingItem(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteShoppingItemMutationResult = NonNullable<Awaited<ReturnType<typeof deleteShoppingItem>>>
+
+    export type DeleteShoppingItemMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a shopping list item
+ */
+export const useDeleteShoppingItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteShoppingItem>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteShoppingItem>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteShoppingItemMutationOptions(options));
     }
 

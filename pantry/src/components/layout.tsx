@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Home, List, Plus, Package, WifiOff } from "lucide-react";
+import { Home, List, Plus, Package, WifiOff, ShoppingCart } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -9,6 +9,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const isItems = location.startsWith("/items") && location !== "/items/new";
   const isHome = location === "/";
+  const isShopping = location === "/shopping";
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background relative overflow-hidden font-sans">
@@ -53,6 +54,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
               className={`text-sm font-medium transition-colors hover:text-primary ${isItems ? "text-primary" : "text-muted-foreground"}`}
             >
               Pantry
+            </Link>
+            <Link
+              href="/shopping"
+              className={`text-sm font-medium transition-colors hover:text-primary ${isShopping ? "text-primary" : "text-muted-foreground"}`}
+            >
+              Shopping
             </Link>
             <Link
               href="/items/new"
@@ -127,6 +134,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className={`flex flex-col items-center gap-1 py-1 min-h-[52px] justify-center transition-colors ${isItems ? "text-primary" : "text-muted-foreground"}`}>
               <List className="w-6 h-6" />
               <span className="text-[11px] font-medium">Pantry</span>
+            </div>
+          </Link>
+
+          {/* Shopping tab */}
+          <Link href="/shopping" className="flex-1">
+            <div className={`flex flex-col items-center gap-1 py-1 min-h-[52px] justify-center transition-colors ${isShopping ? "text-primary" : "text-muted-foreground"}`}>
+              <ShoppingCart className="w-6 h-6" />
+              <span className="text-[11px] font-medium">Shopping</span>
             </div>
           </Link>
 

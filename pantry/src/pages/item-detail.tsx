@@ -97,6 +97,7 @@ export default function ItemDetail() {
   const [editStatus, setEditStatus] = useState<ItemStatus>("in_stock");
   const [editQuantity, setEditQuantity] = useState("");
   const [editUnit, setEditUnit] = useState("");
+  const [editMinThreshold, setEditMinThreshold] = useState("");
   const [editNotes, setEditNotes] = useState("");
   const [editExpirationDate, setEditExpirationDate] = useState<Date | null>(null);
 
@@ -108,6 +109,7 @@ export default function ItemDetail() {
       setEditStatus(item.data.status as ItemStatus);
       setEditQuantity(item.data.quantity ?? "");
       setEditUnit(item.data.unit ?? "");
+      setEditMinThreshold(item.data.minThreshold !== undefined && item.data.minThreshold !== null ? String(item.data.minThreshold) : "");
       setEditNotes(item.data.notes ?? "");
       setEditExpirationDate(item.data.expirationDate ? new Date(item.data.expirationDate) : null);
     }
@@ -181,6 +183,7 @@ export default function ItemDetail() {
           status: editStatus,
           quantity: editQuantity.trim() || undefined,
           unit: editUnit.trim() || undefined,
+          minThreshold: editMinThreshold.trim() ? parseInt(editMinThreshold.trim(), 10) : undefined,
           notes: editNotes.trim() || undefined,
           expirationDate: editExpirationDate ? editExpirationDate.toISOString() : undefined,
         },
@@ -428,7 +431,7 @@ export default function ItemDetail() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="space-y-2">
                     <Label htmlFor="edit-qty">Quantity</Label>
                     <Input
@@ -446,6 +449,17 @@ export default function ItemDetail() {
                       id="edit-unit"
                       value={editUnit}
                       onChange={(e) => setEditUnit(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-minThreshold">Min Threshold</Label>
+                    <Input
+                      id="edit-minThreshold"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={editMinThreshold}
+                      onChange={(e) => setEditMinThreshold(e.target.value)}
                     />
                   </div>
                 </div>

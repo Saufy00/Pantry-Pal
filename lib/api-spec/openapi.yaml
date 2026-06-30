@@ -35,6 +35,11 @@ paths:
       tags: [items]
       summary: List all stock items
       parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
         - name: category
           in: query
           required: false
@@ -249,6 +254,78 @@ paths:
         "404":
           description: Not found
 
+  /shopping:
+    get:
+      operationId: listShoppingItems
+      tags: [items]
+      summary: List custom shopping list items
+      responses:
+        "200":
+          description: List of shopping items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShoppingItem"
+    post:
+      operationId: createShoppingItem
+      tags: [items]
+      summary: Add a new custom shopping list item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingItem"
+
+  /shopping/{id}:
+    patch:
+      operationId: updateShoppingItem
+      tags: [items]
+      summary: Update a shopping list item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingItemUpdate"
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingItem"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteShoppingItem
+      tags: [items]
+      summary: Delete a shopping list item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
@@ -278,6 +355,8 @@ components:
           type: ["string", "null"]
         unit:
           type: ["string", "null"]
+        minThreshold:
+          type: ["integer", "null"]
         notes:
           type: ["string", "null"]
         updatedBy:
@@ -311,6 +390,8 @@ components:
           type: string
         unit:
           type: string
+        minThreshold:
+          type: integer
         notes:
           type: string
         updatedBy:
@@ -336,6 +417,8 @@ components:
           type: string
         unit:
           type: string
+        minThreshold:
+          type: integer
         notes:
           type: string
         updatedBy:
@@ -404,3 +487,37 @@ components:
           type: integer
         out:
           type: integer
+
+    ShoppingItem:
+      type: object
+      required: [id, name, checked, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        checked:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ShoppingItemInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+
+    ShoppingItemUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        checked:
+          type: boolean

@@ -10,6 +10,10 @@ import {
   UpdateItemStatusBody,
   AdjustItemQuantityParams,
   AdjustItemQuantityBody,
+  CreateShoppingItemBody,
+  UpdateShoppingItemParams,
+  UpdateShoppingItemBody,
+  DeleteShoppingItemParams,
 } from "@workspace/api-zod";
 import * as itemsService from "../services/items.service";
 import { badRequest, created, noContent, notFound } from "../utils/response";
@@ -148,6 +152,7 @@ router.post("/items", async (req, res) => {
     status: parsed.data.status,
     quantity: parsed.data.quantity,
     unit: parsed.data.unit,
+    minThreshold: parsed.data.minThreshold,
     notes: parsed.data.notes,
     updatedBy: parsed.data.updatedBy,
     expirationDate: parsed.data.expirationDate,
@@ -155,6 +160,39 @@ router.post("/items", async (req, res) => {
 
   broadcast("item:created", { id: item.id });
   return created(res, item);
+});
+
+// ── Shopping endpoints ─────────────────────────────────────────────────────
+
+router.get("/shopping", async (_req, res) => {
+  const items = await itemsService.listShoppingItems();
+  return res.json(items);
+});
+
+router.post("/shopping", async (req, res) => {
+  const parsed = CreateShoppingItemBody.safeParse(req.body);
+  if (!parsed.success) return badRequest(res, "Invalid input", parsed.error.issues);
+  const item = await itemsService.createShoppingItem(parsed.data);
+  broadcast("shopping:created", { id: item.id });
+  return created(res, item);
+});
+
+router.patch("/shopping/:id", async (req, res) => {
+  const parsedParams = UpdateShoppingItemParams.safeParse({ id: Number(req.params.id) });
+  const parsedBody = UpdateShoppingItemBody.safeParse(req.body);
+  if (!parsedParams.success || !parsedBody.success) return badRequest(res);
+  const item = await itemsService.updateShoppingItem(parsedParams.data.id, parsedBody.data);
+  if (!item) return notFound(res, "Item not found");
+  broadcast("shopping:updated", { id: item.id });
+  return res.json(item);
+});
+
+router.delete("/shopping/:id", async (req, res) => {
+  const parsed = DeleteShoppingItemParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) return badRequest(res);
+  await itemsService.deleteShoppingItem(parsed.data.id);
+  broadcast("shopping:deleted", { id: parsed.data.id });
+  return noContent(res);
 });
 
 export default router;

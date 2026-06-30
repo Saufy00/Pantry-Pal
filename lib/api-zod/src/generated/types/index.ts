@@ -19,5 +19,8 @@ export * from './listItemsParams';
 export * from './listItemsStatus';
 export * from './locationCount';
 export * from './quantityAdjust';
+export * from './shoppingItem';
+export * from './shoppingItemInput';
+export * from './shoppingItemUpdate';
 export * from './statusUpdate';
 export * from './statusUpdateStatus';

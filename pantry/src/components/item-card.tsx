@@ -73,17 +73,23 @@ export function ItemCard({ item, hideCategory }: ItemCardProps) {
               {item.name}
             </h3>
             {(() => {
-              if (!item.expirationDate) return null;
-              const expDate = startOfDay(new Date(item.expirationDate));
-              const now = startOfDay(new Date());
-              if (isBefore(expDate, now)) {
-                return <span className="w-fit text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> Expired</span>;
+              const badges = [];
+              if (item.minThreshold !== undefined && item.minThreshold !== null && currentQty <= item.minThreshold) {
+                badges.push(<span key="low" className="w-fit text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-md flex items-center gap-1">Low Stock</span>);
               }
-              const days = differenceInDays(expDate, now);
-              if (days <= 14) {
-                return <span className="w-fit text-[10px] font-semibold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> {days}d left</span>;
+              if (item.expirationDate) {
+                const expDate = startOfDay(new Date(item.expirationDate));
+                const now = startOfDay(new Date());
+                if (isBefore(expDate, now)) {
+                  badges.push(<span key="exp" className="w-fit text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> Expired</span>);
+                } else {
+                  const days = differenceInDays(expDate, now);
+                  if (days <= 14) {
+                    badges.push(<span key="exp-soon" className="w-fit text-[10px] font-semibold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> {days}d left</span>);
+                  }
+                }
               }
-              return null;
+              return badges.length > 0 ? <div className="flex flex-wrap gap-1 mt-1">{badges}</div> : null;
             })()}
           </div>
           <button

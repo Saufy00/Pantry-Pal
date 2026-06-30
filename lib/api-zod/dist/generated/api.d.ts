@@ -21,15 +21,18 @@ export declare const HealthCheckResponse: zod.ZodObject<{
  * @summary List all stock items
  */
 export declare const ListItemsQueryParams: zod.ZodObject<{
+    search: zod.ZodOptional<zod.ZodString>;
     category: zod.ZodOptional<zod.ZodString>;
     location: zod.ZodOptional<zod.ZodString>;
     status: zod.ZodOptional<zod.ZodEnum<["in_stock", "low", "out"]>>;
 }, "strip", zod.ZodTypeAny, {
     status?: "in_stock" | "low" | "out" | undefined;
+    search?: string | undefined;
     category?: string | undefined;
     location?: string | undefined;
 }, {
     status?: "in_stock" | "low" | "out" | undefined;
+    search?: string | undefined;
     category?: string | undefined;
     location?: string | undefined;
 }>;
@@ -41,6 +44,7 @@ export declare const ListItemsResponseItem: zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    minThreshold: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
@@ -56,6 +60,7 @@ export declare const ListItemsResponseItem: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -69,6 +74,7 @@ export declare const ListItemsResponseItem: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -81,6 +87,7 @@ export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    minThreshold: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
@@ -96,6 +103,7 @@ export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -109,6 +117,7 @@ export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -123,6 +132,7 @@ export declare const CreateItemBody: zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodString>;
     unit: zod.ZodOptional<zod.ZodString>;
+    minThreshold: zod.ZodOptional<zod.ZodNumber>;
     notes: zod.ZodOptional<zod.ZodString>;
     updatedBy: zod.ZodOptional<zod.ZodString>;
     expirationDate: zod.ZodOptional<zod.ZodDate>;
@@ -133,6 +143,7 @@ export declare const CreateItemBody: zod.ZodObject<{
     location?: string | undefined;
     quantity?: string | undefined;
     unit?: string | undefined;
+    minThreshold?: number | undefined;
     notes?: string | undefined;
     updatedBy?: string | undefined;
     expirationDate?: Date | undefined;
@@ -143,6 +154,7 @@ export declare const CreateItemBody: zod.ZodObject<{
     location?: string | undefined;
     quantity?: string | undefined;
     unit?: string | undefined;
+    minThreshold?: number | undefined;
     notes?: string | undefined;
     updatedBy?: string | undefined;
     expirationDate?: Date | undefined;
@@ -155,6 +167,7 @@ export declare const CreateItemResponse: zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    minThreshold: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
@@ -170,6 +183,7 @@ export declare const CreateItemResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -183,6 +197,7 @@ export declare const CreateItemResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -217,6 +232,7 @@ export declare const GetNeedsRestockResponseItem: zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    minThreshold: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
@@ -232,6 +248,7 @@ export declare const GetNeedsRestockResponseItem: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -245,6 +262,7 @@ export declare const GetNeedsRestockResponseItem: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -257,6 +275,7 @@ export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    minThreshold: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
@@ -272,6 +291,7 @@ export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -285,6 +305,7 @@ export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -389,6 +410,7 @@ export declare const GetItemResponse: zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    minThreshold: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
@@ -404,6 +426,7 @@ export declare const GetItemResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -417,6 +440,7 @@ export declare const GetItemResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -438,6 +462,7 @@ export declare const UpdateItemBody: zod.ZodObject<{
     status: zod.ZodOptional<zod.ZodEnum<["in_stock", "low", "out"]>>;
     quantity: zod.ZodOptional<zod.ZodString>;
     unit: zod.ZodOptional<zod.ZodString>;
+    minThreshold: zod.ZodOptional<zod.ZodNumber>;
     notes: zod.ZodOptional<zod.ZodString>;
     updatedBy: zod.ZodOptional<zod.ZodString>;
     expirationDate: zod.ZodOptional<zod.ZodDate>;
@@ -448,6 +473,7 @@ export declare const UpdateItemBody: zod.ZodObject<{
     name?: string | undefined;
     quantity?: string | undefined;
     unit?: string | undefined;
+    minThreshold?: number | undefined;
     notes?: string | undefined;
     updatedBy?: string | undefined;
     expirationDate?: Date | undefined;
@@ -458,6 +484,7 @@ export declare const UpdateItemBody: zod.ZodObject<{
     name?: string | undefined;
     quantity?: string | undefined;
     unit?: string | undefined;
+    minThreshold?: number | undefined;
     notes?: string | undefined;
     updatedBy?: string | undefined;
     expirationDate?: Date | undefined;
@@ -470,6 +497,7 @@ export declare const UpdateItemResponse: zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    minThreshold: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
@@ -485,6 +513,7 @@ export declare const UpdateItemResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -498,6 +527,7 @@ export declare const UpdateItemResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -541,6 +571,7 @@ export declare const UpdateItemStatusResponse: zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    minThreshold: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
@@ -556,6 +587,7 @@ export declare const UpdateItemStatusResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -569,6 +601,7 @@ export declare const UpdateItemStatusResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -598,6 +631,7 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
     status: zod.ZodEnum<["in_stock", "low", "out"]>;
     quantity: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    minThreshold: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
@@ -613,6 +647,7 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
@@ -626,8 +661,129 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
     updatedAt: Date;
     quantity?: string | null | undefined;
     unit?: string | null | undefined;
+    minThreshold?: number | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
 }>;
+/**
+ * @summary List custom shopping list items
+ */
+export declare const ListShoppingItemsResponseItem: zod.ZodObject<{
+    id: zod.ZodNumber;
+    name: zod.ZodString;
+    checked: zod.ZodBoolean;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    checked: boolean;
+}, {
+    id: number;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    checked: boolean;
+}>;
+export declare const ListShoppingItemsResponse: zod.ZodArray<zod.ZodObject<{
+    id: zod.ZodNumber;
+    name: zod.ZodString;
+    checked: zod.ZodBoolean;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    checked: boolean;
+}, {
+    id: number;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    checked: boolean;
+}>, "many">;
+/**
+ * @summary Add a new custom shopping list item
+ */
+export declare const CreateShoppingItemBody: zod.ZodObject<{
+    name: zod.ZodString;
+}, "strip", zod.ZodTypeAny, {
+    name: string;
+}, {
+    name: string;
+}>;
+export declare const CreateShoppingItemResponse: zod.ZodObject<{
+    id: zod.ZodNumber;
+    name: zod.ZodString;
+    checked: zod.ZodBoolean;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    checked: boolean;
+}, {
+    id: number;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    checked: boolean;
+}>;
+/**
+ * @summary Update a shopping list item
+ */
+export declare const UpdateShoppingItemParams: zod.ZodObject<{
+    id: zod.ZodNumber;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+}, {
+    id: number;
+}>;
+export declare const UpdateShoppingItemBody: zod.ZodObject<{
+    name: zod.ZodOptional<zod.ZodString>;
+    checked: zod.ZodOptional<zod.ZodBoolean>;
+}, "strip", zod.ZodTypeAny, {
+    name?: string | undefined;
+    checked?: boolean | undefined;
+}, {
+    name?: string | undefined;
+    checked?: boolean | undefined;
+}>;
+export declare const UpdateShoppingItemResponse: zod.ZodObject<{
+    id: zod.ZodNumber;
+    name: zod.ZodString;
+    checked: zod.ZodBoolean;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    checked: boolean;
+}, {
+    id: number;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    checked: boolean;
+}>;
+/**
+ * @summary Delete a shopping list item
+ */
+export declare const DeleteShoppingItemParams: zod.ZodObject<{
+    id: zod.ZodNumber;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+}, {
+    id: number;
+}>;
+export declare const DeleteShoppingItemResponse: zod.ZodVoid;
 //# sourceMappingURL=api.d.ts.map

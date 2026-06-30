@@ -39,6 +39,7 @@ export default function NewItem() {
   const [status, setStatus] = useState<StatusValue>("in_stock");
   const [quantity, setQuantity] = useState("");
   const [unit, setUnit] = useState("");
+  const [minThreshold, setMinThreshold] = useState("");
   const [notes, setNotes] = useState("");
   const [expirationDate, setExpirationDate] = useState<Date | null>(null);
 
@@ -59,6 +60,7 @@ export default function NewItem() {
           status,
           quantity: quantity.trim() || undefined,
           unit: unit.trim() || undefined,
+          minThreshold: minThreshold.trim() ? parseInt(minThreshold.trim(), 10) : undefined,
           notes: notes.trim() || undefined,
           expirationDate: expirationDate ? expirationDate.toISOString() : undefined,
         },
@@ -177,8 +179,8 @@ export default function NewItem() {
             </Select>
           </div>
 
-          {/* Quantity + Unit (side by side) */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Quantity, Unit, Min Threshold (3 columns) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label htmlFor="quantity">Quantity</Label>
               <Input
@@ -195,9 +197,21 @@ export default function NewItem() {
               <Label htmlFor="unit">Unit</Label>
               <Input
                 id="unit"
-                placeholder="e.g. kg, bottles, packs"
+                placeholder="e.g. kg, bottles"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="minThreshold">Min Threshold</Label>
+              <Input
+                id="minThreshold"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Alert when ≤"
+                value={minThreshold}
+                onChange={(e) => setMinThreshold(e.target.value)}
               />
             </div>
           </div>

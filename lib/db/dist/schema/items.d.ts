@@ -122,6 +122,23 @@ export declare const itemsTable: import("drizzle-orm/pg-core").PgTableWithColumn
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
+        minThreshold: import("drizzle-orm/pg-core").PgColumn<{
+            name: "min_threshold";
+            tableName: "items";
+            dataType: "number";
+            columnType: "PgInteger";
+            data: number;
+            driverParam: string | number;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
         notes: import("drizzle-orm/pg-core").PgColumn<{
             name: "notes";
             tableName: "items";
@@ -217,6 +234,7 @@ export declare const insertItemSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodString>;
     quantity: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     unit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    minThreshold: z.ZodOptional<z.ZodNullable<z.ZodInt>>;
     notes: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     updatedBy: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     expirationDate: z.ZodOptional<z.ZodNullable<z.ZodDate>>;
@@ -231,6 +249,7 @@ export declare const updateItemSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     quantity: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
     unit: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    minThreshold: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodInt>>>;
     notes: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
     updatedBy: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
     expirationDate: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodDate>>>;

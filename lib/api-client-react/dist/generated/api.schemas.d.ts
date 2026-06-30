@@ -25,6 +25,8 @@ export interface Item {
     /** @nullable */
     unit?: string | null;
     /** @nullable */
+    minThreshold?: number | null;
+    /** @nullable */
     notes?: string | null;
     /** @nullable */
     updatedBy?: string | null;
@@ -48,6 +50,7 @@ export interface ItemInput {
     status: ItemInputStatus;
     quantity?: string;
     unit?: string;
+    minThreshold?: number;
     notes?: string;
     updatedBy?: string;
     expirationDate?: string;
@@ -66,6 +69,7 @@ export interface ItemUpdate {
     status?: ItemUpdateStatus;
     quantity?: string;
     unit?: string;
+    minThreshold?: number;
     notes?: string;
     updatedBy?: string;
     expirationDate?: string;
@@ -104,7 +108,24 @@ export interface LocationCount {
     low: number;
     out: number;
 }
+export interface ShoppingItem {
+    id: number;
+    name: string;
+    checked: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface ShoppingItemInput {
+    /** @minLength 1 */
+    name: string;
+}
+export interface ShoppingItemUpdate {
+    /** @minLength 1 */
+    name?: string;
+    checked?: boolean;
+}
 export type ListItemsParams = {
+    search?: string;
     category?: string;
     location?: string;
     status?: ListItemsStatus;

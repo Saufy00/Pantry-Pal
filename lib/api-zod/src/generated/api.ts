@@ -21,6 +21,7 @@ export const HealthCheckResponse = zod.object({
  * @summary List all stock items
  */
 export const ListItemsQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
   "category": zod.coerce.string().optional(),
   "location": zod.coerce.string().optional(),
   "status": zod.enum(['in_stock', 'low', 'out']).optional()
@@ -34,6 +35,7 @@ export const ListItemsResponseItem = zod.object({
   "status": zod.enum(['in_stock', 'low', 'out']),
   "quantity": zod.string().nullish(),
   "unit": zod.string().nullish(),
+  "minThreshold": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
@@ -57,6 +59,7 @@ export const CreateItemBody = zod.object({
   "status": zod.enum(['in_stock', 'low', 'out']),
   "quantity": zod.string().optional(),
   "unit": zod.string().optional(),
+  "minThreshold": zod.number().optional(),
   "notes": zod.string().optional(),
   "updatedBy": zod.string().optional(),
   "expirationDate": zod.coerce.date().optional()
@@ -70,6 +73,7 @@ export const CreateItemResponse = zod.object({
   "status": zod.enum(['in_stock', 'low', 'out']),
   "quantity": zod.string().nullish(),
   "unit": zod.string().nullish(),
+  "minThreshold": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
@@ -100,6 +104,7 @@ export const GetNeedsRestockResponseItem = zod.object({
   "status": zod.enum(['in_stock', 'low', 'out']),
   "quantity": zod.string().nullish(),
   "unit": zod.string().nullish(),
+  "minThreshold": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
@@ -150,6 +155,7 @@ export const GetItemResponse = zod.object({
   "status": zod.enum(['in_stock', 'low', 'out']),
   "quantity": zod.string().nullish(),
   "unit": zod.string().nullish(),
+  "minThreshold": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
@@ -175,6 +181,7 @@ export const UpdateItemBody = zod.object({
   "status": zod.enum(['in_stock', 'low', 'out']).optional(),
   "quantity": zod.string().optional(),
   "unit": zod.string().optional(),
+  "minThreshold": zod.number().optional(),
   "notes": zod.string().optional(),
   "updatedBy": zod.string().optional(),
   "expirationDate": zod.coerce.date().optional()
@@ -188,6 +195,7 @@ export const UpdateItemResponse = zod.object({
   "status": zod.enum(['in_stock', 'low', 'out']),
   "quantity": zod.string().nullish(),
   "unit": zod.string().nullish(),
+  "minThreshold": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
@@ -226,6 +234,7 @@ export const UpdateItemStatusResponse = zod.object({
   "status": zod.enum(['in_stock', 'low', 'out']),
   "quantity": zod.string().nullish(),
   "unit": zod.string().nullish(),
+  "minThreshold": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
@@ -253,11 +262,78 @@ export const AdjustItemQuantityResponse = zod.object({
   "status": zod.enum(['in_stock', 'low', 'out']),
   "quantity": zod.string().nullish(),
   "unit": zod.string().nullish(),
+  "minThreshold": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
+
+
+/**
+ * @summary List custom shopping list items
+ */
+export const ListShoppingItemsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "checked": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListShoppingItemsResponse = zod.array(ListShoppingItemsResponseItem)
+
+
+/**
+ * @summary Add a new custom shopping list item
+ */
+
+
+
+export const CreateShoppingItemBody = zod.object({
+  "name": zod.string().min(1)
+})
+
+export const CreateShoppingItemResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "checked": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update a shopping list item
+ */
+export const UpdateShoppingItemParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const UpdateShoppingItemBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "checked": zod.boolean().optional()
+})
+
+export const UpdateShoppingItemResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "checked": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a shopping list item
+ */
+export const DeleteShoppingItemParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteShoppingItemResponse = zod.void()
 
 

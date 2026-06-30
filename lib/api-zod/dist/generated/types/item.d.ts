@@ -17,6 +17,8 @@ export interface Item {
     /** @nullable */
     unit?: string | null;
     /** @nullable */
+    minThreshold?: number | null;
+    /** @nullable */
     notes?: string | null;
     /** @nullable */
     updatedBy?: string | null;

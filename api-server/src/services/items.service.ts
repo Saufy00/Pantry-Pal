@@ -1,6 +1,6 @@
-import { and, eq, sql } from "drizzle-orm";
-import { db, itemsTable } from "@workspace/db";
-import type { InsertItem } from "@workspace/db";
+import { and, eq, ilike, sql } from "drizzle-orm";
+import { db, itemsTable, shoppingListTable } from "@workspace/db";
+import type { InsertItem, InsertShoppingItem } from "@workspace/db";
 
 export type ItemStatus = "in_stock" | "low" | "out";
 
@@ -8,6 +8,7 @@ export type ListItemsFilter = {
   category?: string;
   location?: string;
   status?: ItemStatus;
+  search?: string;
 };
 
 export type UpdateStatusInput = {
@@ -18,11 +19,12 @@ export type UpdateStatusInput = {
 export type UpdateItemInput = Partial<Omit<InsertItem, "createdAt" | "updatedAt">>;
 
 export async function listItems(filter: ListItemsFilter = {}) {
-  const { category, location, status } = filter;
-  const conditions: ReturnType<typeof eq>[] = [];
+  const { category, location, status, search } = filter;
+  const conditions: ReturnType<typeof eq | typeof ilike>[] = [];
   if (category) conditions.push(eq(itemsTable.category, category));
   if (location) conditions.push(eq(itemsTable.location, location));
   if (status) conditions.push(eq(itemsTable.status, status));
+  if (search) conditions.push(ilike(itemsTable.name, `%${search}%`));
 
   const query = db.select().from(itemsTable);
 
@@ -46,6 +48,7 @@ export async function createItem(data: InsertItem) {
       status: data.status ?? "in_stock",
       quantity: data.quantity ?? null,
       unit: data.unit ?? null,
+      minThreshold: data.minThreshold ?? null,
       notes: data.notes ?? null,
       updatedBy: data.updatedBy ?? null,
       expirationDate: data.expirationDate ?? null,
@@ -78,9 +81,21 @@ export async function adjustItemQuantity(id: number, delta: number) {
 
   const current = parseFloat(item.quantity ?? "0") || 0;
   const next = Math.max(0, current + delta);
+  
+  let newStatus = item.status;
+  if (item.minThreshold !== null && item.minThreshold !== undefined) {
+    if (next <= 0) {
+      newStatus = "out";
+    } else if (next <= item.minThreshold) {
+      newStatus = "low";
+    } else {
+      newStatus = "in_stock";
+    }
+  }
+
   const rows = await db
     .update(itemsTable)
-    .set({ quantity: String(next), updatedAt: new Date() })
+    .set({ quantity: String(next), status: newStatus, updatedAt: new Date() })
     .where(eq(itemsTable.id, id))
     .returning();
   return rows[0] ?? null;
@@ -157,4 +172,34 @@ export async function getLocationSummary() {
   }
 
   return Array.from(map.entries()).map(([location, counts]) => ({ location, ...counts }));
+}
+
+// --- Shopping List Service --- //
+
+export async function listShoppingItems() {
+  return db.select().from(shoppingListTable).orderBy(shoppingListTable.id);
+}
+
+export async function createShoppingItem(data: InsertShoppingItem) {
+  const rows = await db
+    .insert(shoppingListTable)
+    .values({
+      name: data.name,
+      checked: false,
+    })
+    .returning();
+  return rows[0]!;
+}
+
+export async function updateShoppingItem(id: number, data: Partial<InsertShoppingItem>) {
+  const rows = await db
+    .update(shoppingListTable)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(shoppingListTable.id, id))
+    .returning();
+  return rows[0] ?? null;
+}
+
+export async function deleteShoppingItem(id: number) {
+  await db.delete(shoppingListTable).where(eq(shoppingListTable.id, id));
 }

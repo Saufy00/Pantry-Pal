@@ -7,6 +7,7 @@
  */
 import type { ListItemsStatus } from './listItemsStatus';
 export type ListItemsParams = {
+    search?: string;
     category?: string;
     location?: string;
     status?: ListItemsStatus;

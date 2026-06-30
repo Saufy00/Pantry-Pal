@@ -1,5 +1,5 @@
 import type { QueryKey, UseMutationOptions, UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { CategoryCount, HealthStatus, Item, ItemInput, ItemUpdate, ItemsSummary, ListItemsParams, LocationCount, QuantityAdjust, StatusUpdate } from './api.schemas';
+import type { CategoryCount, HealthStatus, Item, ItemInput, ItemUpdate, ItemsSummary, ListItemsParams, LocationCount, QuantityAdjust, ShoppingItem, ShoppingItemInput, ShoppingItemUpdate, StatusUpdate } from './api.schemas';
 import { customFetch } from '../custom-fetch';
 import type { ErrorType, BodyType } from '../custom-fetch';
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -312,6 +312,113 @@ export declare const useAdjustItemQuantity: <TError = ErrorType<void>, TContext 
 }) => UseMutationResult<Awaited<ReturnType<typeof adjustItemQuantity>>, TError, {
     id: number;
     data: BodyType<QuantityAdjust>;
+}, TContext>;
+export declare const getListShoppingItemsUrl: () => string;
+/**
+ * @summary List custom shopping list items
+ */
+export declare const listShoppingItems: (options?: RequestInit) => Promise<ShoppingItem[]>;
+export declare const getListShoppingItemsQueryKey: () => readonly ["/api/shopping"];
+export declare const getListShoppingItemsQueryOptions: <TData = Awaited<ReturnType<typeof listShoppingItems>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listShoppingItems>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof listShoppingItems>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type ListShoppingItemsQueryResult = NonNullable<Awaited<ReturnType<typeof listShoppingItems>>>;
+export type ListShoppingItemsQueryError = ErrorType<unknown>;
+/**
+ * @summary List custom shopping list items
+ */
+export declare function useListShoppingItems<TData = Awaited<ReturnType<typeof listShoppingItems>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listShoppingItems>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getCreateShoppingItemUrl: () => string;
+/**
+ * @summary Add a new custom shopping list item
+ */
+export declare const createShoppingItem: (shoppingItemInput: ShoppingItemInput, options?: RequestInit) => Promise<ShoppingItem>;
+export declare const getCreateShoppingItemMutationOptions: <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof createShoppingItem>>, TError, {
+        data: BodyType<ShoppingItemInput>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationOptions<Awaited<ReturnType<typeof createShoppingItem>>, TError, {
+    data: BodyType<ShoppingItemInput>;
+}, TContext>;
+export type CreateShoppingItemMutationResult = NonNullable<Awaited<ReturnType<typeof createShoppingItem>>>;
+export type CreateShoppingItemMutationBody = BodyType<ShoppingItemInput>;
+export type CreateShoppingItemMutationError = ErrorType<unknown>;
+/**
+* @summary Add a new custom shopping list item
+*/
+export declare const useCreateShoppingItem: <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof createShoppingItem>>, TError, {
+        data: BodyType<ShoppingItemInput>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationResult<Awaited<ReturnType<typeof createShoppingItem>>, TError, {
+    data: BodyType<ShoppingItemInput>;
+}, TContext>;
+export declare const getUpdateShoppingItemUrl: (id: number) => string;
+/**
+ * @summary Update a shopping list item
+ */
+export declare const updateShoppingItem: (id: number, shoppingItemUpdate: ShoppingItemUpdate, options?: RequestInit) => Promise<ShoppingItem>;
+export declare const getUpdateShoppingItemMutationOptions: <TError = ErrorType<void>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof updateShoppingItem>>, TError, {
+        id: number;
+        data: BodyType<ShoppingItemUpdate>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationOptions<Awaited<ReturnType<typeof updateShoppingItem>>, TError, {
+    id: number;
+    data: BodyType<ShoppingItemUpdate>;
+}, TContext>;
+export type UpdateShoppingItemMutationResult = NonNullable<Awaited<ReturnType<typeof updateShoppingItem>>>;
+export type UpdateShoppingItemMutationBody = BodyType<ShoppingItemUpdate>;
+export type UpdateShoppingItemMutationError = ErrorType<void>;
+/**
+* @summary Update a shopping list item
+*/
+export declare const useUpdateShoppingItem: <TError = ErrorType<void>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof updateShoppingItem>>, TError, {
+        id: number;
+        data: BodyType<ShoppingItemUpdate>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationResult<Awaited<ReturnType<typeof updateShoppingItem>>, TError, {
+    id: number;
+    data: BodyType<ShoppingItemUpdate>;
+}, TContext>;
+export declare const getDeleteShoppingItemUrl: (id: number) => string;
+/**
+ * @summary Delete a shopping list item
+ */
+export declare const deleteShoppingItem: (id: number, options?: RequestInit) => Promise<void>;
+export declare const getDeleteShoppingItemMutationOptions: <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteShoppingItem>>, TError, {
+        id: number;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationOptions<Awaited<ReturnType<typeof deleteShoppingItem>>, TError, {
+    id: number;
+}, TContext>;
+export type DeleteShoppingItemMutationResult = NonNullable<Awaited<ReturnType<typeof deleteShoppingItem>>>;
+export type DeleteShoppingItemMutationError = ErrorType<unknown>;
+/**
+* @summary Delete a shopping list item
+*/
+export declare const useDeleteShoppingItem: <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteShoppingItem>>, TError, {
+        id: number;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationResult<Awaited<ReturnType<typeof deleteShoppingItem>>, TError, {
+    id: number;
 }, TContext>;
 export {};
 //# sourceMappingURL=api.d.ts.map
