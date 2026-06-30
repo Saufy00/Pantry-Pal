@@ -16,5 +16,6 @@ export interface ItemUpdate {
     unit?: string;
     notes?: string;
     updatedBy?: string;
+    expirationDate?: Date;
 }
 //# sourceMappingURL=itemUpdate.d.ts.map

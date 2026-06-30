@@ -28,6 +28,8 @@ export interface Item {
     notes?: string | null;
     /** @nullable */
     updatedBy?: string | null;
+    /** @nullable */
+    expirationDate?: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -48,6 +50,7 @@ export interface ItemInput {
     unit?: string;
     notes?: string;
     updatedBy?: string;
+    expirationDate?: string;
 }
 export type ItemUpdateStatus = typeof ItemUpdateStatus[keyof typeof ItemUpdateStatus];
 export declare const ItemUpdateStatus: {
@@ -65,6 +68,7 @@ export interface ItemUpdate {
     unit?: string;
     notes?: string;
     updatedBy?: string;
+    expirationDate?: string;
 }
 export type StatusUpdateStatus = typeof StatusUpdateStatus[keyof typeof StatusUpdateStatus];
 export declare const StatusUpdateStatus: {

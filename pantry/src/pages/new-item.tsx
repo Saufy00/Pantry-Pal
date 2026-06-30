@@ -21,8 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 import { Link } from "wouter";
+import { BarcodeScanner } from "@/components/barcode-scanner";
+import { addDays, addMonths, format } from "date-fns";
 
 type StatusValue = "in_stock" | "low" | "out";
 
@@ -38,6 +40,7 @@ export default function NewItem() {
   const [quantity, setQuantity] = useState("");
   const [unit, setUnit] = useState("");
   const [notes, setNotes] = useState("");
+  const [expirationDate, setExpirationDate] = useState<Date | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +60,7 @@ export default function NewItem() {
           quantity: quantity.trim() || undefined,
           unit: unit.trim() || undefined,
           notes: notes.trim() || undefined,
+          expirationDate: expirationDate ? expirationDate.toISOString() : undefined,
         },
       },
       {
@@ -106,6 +110,15 @@ export default function NewItem() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Barcode Scanner */}
+          <BarcodeScanner 
+            onProductFound={(product) => {
+              if (product.name) setName(product.name);
+              if (product.category && !category) setCategory(product.category);
+              if (product.imageUrl) setNotes((prev) => prev ? `${prev}\nImage: ${product.imageUrl}` : `Image: ${product.imageUrl}`);
+            }} 
+          />
+
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name">
@@ -187,6 +200,36 @@ export default function NewItem() {
                 onChange={(e) => setUnit(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Expiry Presets */}
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              Estimated Expiration
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setExpirationDate(addDays(new Date(), 7))}>
+                +1 Week
+              </Button>
+              <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setExpirationDate(addMonths(new Date(), 1))}>
+                +1 Month
+              </Button>
+              <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setExpirationDate(addMonths(new Date(), 3))}>
+                +3 Months
+              </Button>
+              <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setExpirationDate(addMonths(new Date(), 6))}>
+                +6 Months
+              </Button>
+              <Button type="button" variant="ghost" size="sm" className="rounded-full" onClick={() => setExpirationDate(null)}>
+                Clear
+              </Button>
+            </div>
+            {expirationDate && (
+              <p className="text-sm text-muted-foreground pl-1">
+                Expires on: <span className="font-medium text-foreground">{format(expirationDate, "MMM d, yyyy")}</span>
+              </p>
+            )}
           </div>
 
           {/* Notes */}

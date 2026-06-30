@@ -11,7 +11,8 @@ import {
   getGetItemQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Package, Plus, Minus, MapPin } from "lucide-react";
+import { Package, Plus, Minus, MapPin, Calendar, Clock } from "lucide-react";
+import { differenceInDays, isBefore, startOfDay } from "date-fns";
 import { toast } from "sonner";
 import { cycleStatus, getStatusClasses, getStatusLabel, type ItemStatus } from "@/utils/status";
 
@@ -67,9 +68,24 @@ export function ItemCard({ item, hideCategory }: ItemCardProps) {
 
         {/* Name + status badge */}
         <div className="flex justify-between items-start gap-3">
-          <h3 className="font-medium text-foreground text-base leading-tight group-hover:text-primary transition-colors flex-1 min-w-0 truncate">
-            {item.name}
-          </h3>
+          <div className="flex-1 min-w-0 flex flex-col gap-1">
+            <h3 className="font-medium text-foreground text-base leading-tight group-hover:text-primary transition-colors truncate">
+              {item.name}
+            </h3>
+            {(() => {
+              if (!item.expirationDate) return null;
+              const expDate = startOfDay(new Date(item.expirationDate));
+              const now = startOfDay(new Date());
+              if (isBefore(expDate, now)) {
+                return <span className="w-fit text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> Expired</span>;
+              }
+              const days = differenceInDays(expDate, now);
+              if (days <= 14) {
+                return <span className="w-fit text-[10px] font-semibold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> {days}d left</span>;
+              }
+              return null;
+            })()}
+          </div>
           <button
             onClick={handleStatusCycle}
             className={`shrink-0 px-2.5 py-1 text-[11px] font-semibold rounded-full transition-all hover:scale-105 active:scale-95 border ${getStatusClasses(item.status as ItemStatus)}`}

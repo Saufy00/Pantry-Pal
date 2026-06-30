@@ -156,6 +156,23 @@ export declare const itemsTable: import("drizzle-orm/pg-core").PgTableWithColumn
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
+        expirationDate: import("drizzle-orm/pg-core").PgColumn<{
+            name: "expiration_date";
+            tableName: "items";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
         createdAt: import("drizzle-orm/pg-core").PgColumn<{
             name: "created_at";
             tableName: "items";
@@ -202,6 +219,7 @@ export declare const insertItemSchema: z.ZodObject<{
     unit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     notes: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     updatedBy: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    expirationDate: z.ZodOptional<z.ZodNullable<z.ZodDate>>;
 }, {
     out: {};
     in: {};
@@ -215,6 +233,7 @@ export declare const updateItemSchema: z.ZodObject<{
     unit: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
     notes: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
     updatedBy: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    expirationDate: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodDate>>>;
 }, {
     out: {};
     in: {};

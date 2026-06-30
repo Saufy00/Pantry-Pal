@@ -21,6 +21,8 @@ export interface Item {
   notes?: string | null;
   /** @nullable */
   updatedBy?: string | null;
+  /** @nullable */
+  expirationDate?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

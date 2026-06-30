@@ -18,4 +18,5 @@ export interface ItemInput {
   unit?: string;
   notes?: string;
   updatedBy?: string;
+  expirationDate?: Date;
 }

@@ -150,6 +150,7 @@ router.post("/items", async (req, res) => {
     unit: parsed.data.unit,
     notes: parsed.data.notes,
     updatedBy: parsed.data.updatedBy,
+    expirationDate: parsed.data.expirationDate,
   });
 
   broadcast("item:created", { id: item.id });

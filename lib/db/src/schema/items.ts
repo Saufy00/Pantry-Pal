@@ -12,6 +12,7 @@ export const itemsTable = pgTable("items", {
   unit: text("unit"),
   notes: text("notes"),
   updatedBy: text("updated_by"),
+  expirationDate: timestamp("expiration_date"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

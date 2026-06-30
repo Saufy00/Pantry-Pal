@@ -36,6 +36,7 @@ export const ListItemsResponseItem = zod.object({
   "unit": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
+  "expirationDate": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -57,7 +58,8 @@ export const CreateItemBody = zod.object({
   "quantity": zod.string().optional(),
   "unit": zod.string().optional(),
   "notes": zod.string().optional(),
-  "updatedBy": zod.string().optional()
+  "updatedBy": zod.string().optional(),
+  "expirationDate": zod.coerce.date().optional()
 })
 
 export const CreateItemResponse = zod.object({
@@ -70,6 +72,7 @@ export const CreateItemResponse = zod.object({
   "unit": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
+  "expirationDate": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -99,6 +102,7 @@ export const GetNeedsRestockResponseItem = zod.object({
   "unit": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
+  "expirationDate": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -148,6 +152,7 @@ export const GetItemResponse = zod.object({
   "unit": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
+  "expirationDate": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -171,7 +176,8 @@ export const UpdateItemBody = zod.object({
   "quantity": zod.string().optional(),
   "unit": zod.string().optional(),
   "notes": zod.string().optional(),
-  "updatedBy": zod.string().optional()
+  "updatedBy": zod.string().optional(),
+  "expirationDate": zod.coerce.date().optional()
 })
 
 export const UpdateItemResponse = zod.object({
@@ -184,6 +190,7 @@ export const UpdateItemResponse = zod.object({
   "unit": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
+  "expirationDate": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -221,6 +228,7 @@ export const UpdateItemStatusResponse = zod.object({
   "unit": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
+  "expirationDate": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -247,6 +255,7 @@ export const AdjustItemQuantityResponse = zod.object({
   "unit": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
+  "expirationDate": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })

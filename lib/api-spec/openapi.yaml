@@ -282,6 +282,9 @@ components:
           type: ["string", "null"]
         updatedBy:
           type: ["string", "null"]
+        expirationDate:
+          type: ["string", "null"]
+          format: date-time
         createdAt:
           type: string
           format: date-time
@@ -312,6 +315,9 @@ components:
           type: string
         updatedBy:
           type: string
+        expirationDate:
+          type: string
+          format: date-time
 
     ItemUpdate:
       type: object
@@ -334,6 +340,9 @@ components:
           type: string
         updatedBy:
           type: string
+        expirationDate:
+          type: string
+          format: date-time
 
     StatusUpdate:
       type: object

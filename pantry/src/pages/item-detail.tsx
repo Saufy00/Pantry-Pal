@@ -62,7 +62,7 @@ import {
   getStatusLabel,
   type ItemStatus,
 } from "@/utils/status";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, addDays, addMonths, format, startOfDay, isBefore, differenceInDays } from "date-fns";
 
 function invalidateAll(
   qc: ReturnType<typeof useQueryClient>,
@@ -98,6 +98,7 @@ export default function ItemDetail() {
   const [editQuantity, setEditQuantity] = useState("");
   const [editUnit, setEditUnit] = useState("");
   const [editNotes, setEditNotes] = useState("");
+  const [editExpirationDate, setEditExpirationDate] = useState<Date | null>(null);
 
   const openEditDialog = () => {
     if (item.data) {
@@ -108,6 +109,7 @@ export default function ItemDetail() {
       setEditQuantity(item.data.quantity ?? "");
       setEditUnit(item.data.unit ?? "");
       setEditNotes(item.data.notes ?? "");
+      setEditExpirationDate(item.data.expirationDate ? new Date(item.data.expirationDate) : null);
     }
     setEditOpen(true);
   };
@@ -180,6 +182,7 @@ export default function ItemDetail() {
           quantity: editQuantity.trim() || undefined,
           unit: editUnit.trim() || undefined,
           notes: editNotes.trim() || undefined,
+          expirationDate: editExpirationDate ? editExpirationDate.toISOString() : undefined,
         },
       },
       {
@@ -335,6 +338,19 @@ export default function ItemDetail() {
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <Clock className="w-3.5 h-3.5 shrink-0" />
             <div className="space-y-1">
+              {data.expirationDate && (
+                <p className="flex items-center gap-1.5 font-medium text-foreground mb-1">
+                  {(() => {
+                    const expDate = startOfDay(new Date(data.expirationDate));
+                    const now = startOfDay(new Date());
+                    if (isBefore(expDate, now)) {
+                      return <span className="text-red-600">Expired {format(expDate, "MMM d, yyyy")}</span>;
+                    }
+                    const days = differenceInDays(expDate, now);
+                    return <span className={days <= 14 ? "text-amber-600" : ""}>Expires in {days} days ({format(expDate, "MMM d, yyyy")})</span>;
+                  })()}
+                </p>
+              )}
               <p>
                 Updated{" "}
                 {formatDistanceToNow(new Date(data.updatedAt), {
@@ -433,6 +449,36 @@ export default function ItemDetail() {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    Expiration Date
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setEditExpirationDate(addDays(new Date(), 7))}>
+                      +1 Week
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setEditExpirationDate(addMonths(new Date(), 1))}>
+                      +1 Month
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setEditExpirationDate(addMonths(new Date(), 3))}>
+                      +3 Months
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setEditExpirationDate(addMonths(new Date(), 6))}>
+                      +6 Months
+                    </Button>
+                    <Button type="button" variant="ghost" size="sm" className="rounded-full" onClick={() => setEditExpirationDate(null)}>
+                      Clear
+                    </Button>
+                  </div>
+                  {editExpirationDate && (
+                    <p className="text-sm text-muted-foreground pl-1">
+                      Set to: <span className="font-medium text-foreground">{format(editExpirationDate, "MMM d, yyyy")}</span>
+                    </p>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="edit-notes">Notes</Label>
                   <textarea

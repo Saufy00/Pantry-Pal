@@ -43,6 +43,7 @@ export declare const ListItemsResponseItem: zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -57,6 +58,7 @@ export declare const ListItemsResponseItem: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -69,6 +71,7 @@ export declare const ListItemsResponseItem: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }>;
 export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     id: zod.ZodNumber;
@@ -80,6 +83,7 @@ export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -94,6 +98,7 @@ export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -106,6 +111,7 @@ export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }>, "many">;
 /**
  * @summary Add a new stock item
@@ -119,6 +125,7 @@ export declare const CreateItemBody: zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodString>;
     notes: zod.ZodOptional<zod.ZodString>;
     updatedBy: zod.ZodOptional<zod.ZodString>;
+    expirationDate: zod.ZodOptional<zod.ZodDate>;
 }, "strip", zod.ZodTypeAny, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -128,6 +135,7 @@ export declare const CreateItemBody: zod.ZodObject<{
     unit?: string | undefined;
     notes?: string | undefined;
     updatedBy?: string | undefined;
+    expirationDate?: Date | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -137,6 +145,7 @@ export declare const CreateItemBody: zod.ZodObject<{
     unit?: string | undefined;
     notes?: string | undefined;
     updatedBy?: string | undefined;
+    expirationDate?: Date | undefined;
 }>;
 export declare const CreateItemResponse: zod.ZodObject<{
     id: zod.ZodNumber;
@@ -148,6 +157,7 @@ export declare const CreateItemResponse: zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -162,6 +172,7 @@ export declare const CreateItemResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -174,6 +185,7 @@ export declare const CreateItemResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }>;
 /**
  * @summary Get stock summary counts
@@ -207,6 +219,7 @@ export declare const GetNeedsRestockResponseItem: zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -221,6 +234,7 @@ export declare const GetNeedsRestockResponseItem: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -233,6 +247,7 @@ export declare const GetNeedsRestockResponseItem: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }>;
 export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     id: zod.ZodNumber;
@@ -244,6 +259,7 @@ export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -258,6 +274,7 @@ export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -270,6 +287,7 @@ export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }>, "many">;
 /**
  * @summary List all categories with item counts
@@ -373,6 +391,7 @@ export declare const GetItemResponse: zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -387,6 +406,7 @@ export declare const GetItemResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -399,6 +419,7 @@ export declare const GetItemResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }>;
 /**
  * @summary Update a stock item
@@ -419,6 +440,7 @@ export declare const UpdateItemBody: zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodString>;
     notes: zod.ZodOptional<zod.ZodString>;
     updatedBy: zod.ZodOptional<zod.ZodString>;
+    expirationDate: zod.ZodOptional<zod.ZodDate>;
 }, "strip", zod.ZodTypeAny, {
     status?: "in_stock" | "low" | "out" | undefined;
     category?: string | undefined;
@@ -428,6 +450,7 @@ export declare const UpdateItemBody: zod.ZodObject<{
     unit?: string | undefined;
     notes?: string | undefined;
     updatedBy?: string | undefined;
+    expirationDate?: Date | undefined;
 }, {
     status?: "in_stock" | "low" | "out" | undefined;
     category?: string | undefined;
@@ -437,6 +460,7 @@ export declare const UpdateItemBody: zod.ZodObject<{
     unit?: string | undefined;
     notes?: string | undefined;
     updatedBy?: string | undefined;
+    expirationDate?: Date | undefined;
 }>;
 export declare const UpdateItemResponse: zod.ZodObject<{
     id: zod.ZodNumber;
@@ -448,6 +472,7 @@ export declare const UpdateItemResponse: zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -462,6 +487,7 @@ export declare const UpdateItemResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -474,6 +500,7 @@ export declare const UpdateItemResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }>;
 /**
  * @summary Delete a stock item
@@ -516,6 +543,7 @@ export declare const UpdateItemStatusResponse: zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -530,6 +558,7 @@ export declare const UpdateItemStatusResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -542,6 +571,7 @@ export declare const UpdateItemStatusResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }>;
 /**
  * @summary Increment or decrement item quantity by a delta
@@ -570,6 +600,7 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
     unit: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -584,6 +615,7 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -596,5 +628,6 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
     unit?: string | null | undefined;
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
+    expirationDate?: Date | null | undefined;
 }>;
 //# sourceMappingURL=api.d.ts.map

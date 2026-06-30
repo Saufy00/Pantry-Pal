@@ -48,6 +48,7 @@ export async function createItem(data: InsertItem) {
       unit: data.unit ?? null,
       notes: data.notes ?? null,
       updatedBy: data.updatedBy ?? null,
+      expirationDate: data.expirationDate ?? null,
     })
     .returning();
   return rows[0]!;
