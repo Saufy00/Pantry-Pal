@@ -112,3 +112,9 @@ See `.env.example` for all required and optional variables.
 | `NODE_ENV` | No | `development` or `production` |
 | `LOG_LEVEL` | No | Pino log level (default: `info`) |
 | `SESSION_SECRET` | No | Secret for session signing |
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+*Note: Product barcode data is retrieved from [Open Food Facts](https://world.openfoodfacts.org/) under the Open Database License (ODbL).*

@@ -88,6 +88,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
+      {/* Footer */}
+      <footer className="w-full border-t border-border/10 py-6 text-center text-xs text-muted-foreground z-10 pb-28 md:pb-6">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
+          <span>&copy; {new Date().getFullYear()} Home Stock. All rights reserved.</span>
+          <div className="flex gap-4">
+            <Link href="/privacy" className="hover:text-foreground transition-colors underline underline-offset-4">
+              Privacy Policy
+            </Link>
+          </div>
+        </div>
+      </footer>
+
       {/* Mobile bottom tab bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border">
         {/* Safe area padding for iOS home indicator */}

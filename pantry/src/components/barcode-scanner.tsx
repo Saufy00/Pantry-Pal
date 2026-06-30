@@ -96,6 +96,9 @@ export function BarcodeScanner({
         <X className="w-4 h-4 mr-2" />
         Cancel Scan
       </Button>
+      <p className="text-[10px] text-muted-foreground/60 text-center">
+        Product lookup powered by <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted-foreground">Open Food Facts</a> (ODbL).
+      </p>
     </div>
   );
 }
