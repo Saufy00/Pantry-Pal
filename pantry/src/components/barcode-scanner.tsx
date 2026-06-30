@@ -36,9 +36,23 @@ export function BarcodeScanner({
           
           toast.info("Looking up product...", { id: "barcode-lookup" });
           try {
-            const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${decodedText}.json`);
-            const data = await res.json();
-            if (data.status === 1 && data.product) {
+            const endpoints = [
+              "https://world.openfoodfacts.org",
+              "https://world.openproductsfacts.org",
+              "https://world.openbeautyfacts.org"
+            ];
+
+            let data = null;
+            for (const baseUrl of endpoints) {
+              const res = await fetch(`${baseUrl}/api/v0/product/${decodedText}.json`);
+              const json = await res.json();
+              if (json.status === 1 && json.product) {
+                data = json;
+                break;
+              }
+            }
+
+            if (data && data.product) {
               const product = data.product;
               const name = product.product_name || product.product_name_en;
               const category = product.categories_tags?.[0]?.replace('en:', '').replace('-', ' ') || '';
@@ -97,7 +111,7 @@ export function BarcodeScanner({
         Cancel Scan
       </Button>
       <p className="text-[10px] text-muted-foreground/60 text-center">
-        Product lookup powered by <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted-foreground">Open Food Facts</a> (ODbL).
+        Product lookup powered by <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted-foreground">Open Food Facts</a> and its sister projects (ODbL).
       </p>
     </div>
   );
