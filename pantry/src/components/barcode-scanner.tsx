@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Camera, X } from "lucide-react";
 import { toast } from "sonner";
 import { lookupProductByBarcode } from "@workspace/api-client-react";
+import { getCachedProductByBarcode, saveCachedProduct } from "@/utils/db-cache";
 
 export function BarcodeScanner({
   onProductFound,
@@ -37,9 +38,26 @@ export function BarcodeScanner({
           
           toast.info("Looking up product...", { id: "barcode-lookup" });
           try {
+            // 1. Try local cache first
+            const cachedProduct = await getCachedProductByBarcode(decodedText);
+            if (cachedProduct) {
+              toast.success("Product found in local cache!", { id: "barcode-lookup" });
+              onProductFound({
+                name: cachedProduct.name,
+                category: cachedProduct.category || undefined,
+                brand: cachedProduct.brand || undefined,
+                imageUrl: cachedProduct.imageUrl || undefined,
+                id: cachedProduct.id,
+                barcode: cachedProduct.barcode,
+              });
+              return;
+            }
+
+            // 2. Fetch from server if cache miss
             const product = await lookupProductByBarcode(decodedText);
             if (product && product.name) {
               toast.success("Product found!", { id: "barcode-lookup" });
+              await saveCachedProduct(product);
               onProductFound({
                 name: product.name,
                 category: product.category || undefined,

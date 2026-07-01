@@ -1134,6 +1134,13 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
 /**
  * @summary List all products in catalog
  */
+export declare const ListProductsQueryParams: zod.ZodObject<{
+    search: zod.ZodOptional<zod.ZodString>;
+}, "strip", zod.ZodTypeAny, {
+    search?: string | undefined;
+}, {
+    search?: string | undefined;
+}>;
 export declare const ListProductsResponseItem: zod.ZodObject<{
     id: zod.ZodNumber;
     barcode: zod.ZodString;

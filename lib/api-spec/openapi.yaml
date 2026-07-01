@@ -259,6 +259,12 @@ paths:
       operationId: listProducts
       tags: [products]
       summary: List all products in catalog
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: List of products

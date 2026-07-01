@@ -1,5 +1,5 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -11,8 +11,39 @@ import Shopping from "@/pages/shopping";
 import PrivacyPolicy from "@/pages/privacy";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useOfflineQueue } from "@/hooks/useOfflineQueue";
+import { saveCachedProduct } from "@/utils/db-cache";
+
+function isProduct(obj: any): boolean {
+  return obj && typeof obj === "object" && "barcode" in obj && "name" in obj && "id" in obj;
+}
+
+function extractAndCacheProducts(data: any) {
+  if (!data) return;
+  if (Array.isArray(data)) {
+    data.forEach(extractAndCacheProducts);
+    return;
+  }
+  if (typeof data === "object") {
+    if (isProduct(data)) {
+      saveCachedProduct(data);
+    } else if (data.product && isProduct(data.product)) {
+      saveCachedProduct(data.product);
+    }
+    for (const key of Object.keys(data)) {
+      const val = data[key];
+      if (val && typeof val === "object") {
+        extractAndCacheProducts(val);
+      }
+    }
+  }
+}
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onSuccess: (data) => {
+      extractAndCacheProducts(data);
+    },
+  }),
   defaultOptions: {
     queries: {
       staleTime: 30_000,

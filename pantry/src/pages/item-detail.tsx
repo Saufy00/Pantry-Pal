@@ -56,6 +56,7 @@ import {
   MapPin,
   Clock,
 } from "lucide-react";
+import { ProductAutocomplete } from "@/components/product-autocomplete";
 import {
   cycleStatus,
   getStatusClasses,
@@ -428,10 +429,15 @@ export default function ItemDetail() {
                 )}
                 <div className="space-y-2">
                   <Label htmlFor="edit-name">Name</Label>
-                  <Input
+                  <ProductAutocomplete
                     id="edit-name"
                     value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
+                    onChange={(val) => setEditName(val)}
+                    onSelectProduct={(product) => {
+                      setEditProductId(product.id);
+                      setEditName(product.name);
+                      if (product.category) setEditCategory(product.category);
+                    }}
                     required
                   />
                 </div>

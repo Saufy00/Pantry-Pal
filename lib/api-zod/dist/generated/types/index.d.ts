@@ -16,6 +16,7 @@ export * from './itemUpdate';
 export * from './itemUpdateStatus';
 export * from './listItemsParams';
 export * from './listItemsStatus';
+export * from './listProductsParams';
 export * from './locationCount';
 export * from './product';
 export * from './productInput';

@@ -1,5 +1,5 @@
 import type { QueryKey, UseMutationOptions, UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { CategoryCount, HealthStatus, Item, ItemInput, ItemUpdate, ItemsSummary, ListItemsParams, LocationCount, Product, ProductInput, ProductUpdate, QuantityAdjust, ShoppingItem, ShoppingItemInput, ShoppingItemUpdate, StatusUpdate } from './api.schemas';
+import type { CategoryCount, HealthStatus, Item, ItemInput, ItemUpdate, ItemsSummary, ListItemsParams, ListProductsParams, LocationCount, Product, ProductInput, ProductUpdate, QuantityAdjust, ShoppingItem, ShoppingItemInput, ShoppingItemUpdate, StatusUpdate } from './api.schemas';
 import { customFetch } from '../custom-fetch';
 import type { ErrorType, BodyType } from '../custom-fetch';
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -313,13 +313,13 @@ export declare const useAdjustItemQuantity: <TError = ErrorType<void>, TContext 
     id: number;
     data: BodyType<QuantityAdjust>;
 }, TContext>;
-export declare const getListProductsUrl: () => string;
+export declare const getListProductsUrl: (params?: ListProductsParams) => string;
 /**
  * @summary List all products in catalog
  */
-export declare const listProducts: (options?: RequestInit) => Promise<Product[]>;
-export declare const getListProductsQueryKey: () => readonly ["/api/products"];
-export declare const getListProductsQueryOptions: <TData = Awaited<ReturnType<typeof listProducts>>, TError = ErrorType<unknown>>(options?: {
+export declare const listProducts: (params?: ListProductsParams, options?: RequestInit) => Promise<Product[]>;
+export declare const getListProductsQueryKey: (params?: ListProductsParams) => readonly ["/api/products", ...ListProductsParams[]];
+export declare const getListProductsQueryOptions: <TData = Awaited<ReturnType<typeof listProducts>>, TError = ErrorType<unknown>>(params?: ListProductsParams, options?: {
     query?: UseQueryOptions<Awaited<ReturnType<typeof listProducts>>, TError, TData>;
     request?: SecondParameter<typeof customFetch>;
 }) => UseQueryOptions<Awaited<ReturnType<typeof listProducts>>, TError, TData> & {
@@ -330,7 +330,7 @@ export type ListProductsQueryError = ErrorType<unknown>;
 /**
  * @summary List all products in catalog
  */
-export declare function useListProducts<TData = Awaited<ReturnType<typeof listProducts>>, TError = ErrorType<unknown>>(options?: {
+export declare function useListProducts<TData = Awaited<ReturnType<typeof listProducts>>, TError = ErrorType<unknown>>(params?: ListProductsParams, options?: {
     query?: UseQueryOptions<Awaited<ReturnType<typeof listProducts>>, TError, TData>;
     request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & {

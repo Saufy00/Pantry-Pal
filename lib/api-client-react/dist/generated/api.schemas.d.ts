@@ -172,4 +172,7 @@ export declare const ListItemsStatus: {
     readonly low: "low";
     readonly out: "out";
 };
+export type ListProductsParams = {
+    search?: string;
+};
 //# sourceMappingURL=api.schemas.d.ts.map

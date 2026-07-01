@@ -1,9 +1,20 @@
-import { eq } from "drizzle-orm";
+import { eq, or, ilike } from "drizzle-orm";
 import { db, productsTable } from "@workspace/db";
 import type { InsertProduct, Product } from "@workspace/db";
 
-export async function listProducts() {
-  return db.select().from(productsTable).orderBy(productsTable.name);
+export async function listProducts(search?: string) {
+  const query = db.select().from(productsTable);
+  if (search) {
+    return query
+      .where(
+        or(
+          ilike(productsTable.name, `%${search}%`),
+          ilike(productsTable.brand, `%${search}%`)
+        )
+      )
+      .orderBy(productsTable.name);
+  }
+  return query.orderBy(productsTable.name);
 }
 
 export async function getProductById(id: number) {

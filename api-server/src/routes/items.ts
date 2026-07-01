@@ -19,6 +19,7 @@ import {
   GetProductParams,
   UpdateProductParams,
   UpdateProductBody,
+  ListProductsQueryParams,
 } from "@workspace/api-zod";
 import * as itemsService from "../services/items.service";
 import * as productsService from "../services/products.service";
@@ -213,8 +214,11 @@ router.get("/products/barcode/:barcode", async (req, res) => {
   return res.json(product);
 });
 
-router.get("/products", async (_req, res) => {
-  const products = await productsService.listProducts();
+router.get("/products", async (req, res) => {
+  const parsed = ListProductsQueryParams.safeParse(req.query);
+  if (!parsed.success) return badRequest(res, "Invalid query params");
+
+  const products = await productsService.listProducts(parsed.data.search);
   return res.json(products);
 });
 

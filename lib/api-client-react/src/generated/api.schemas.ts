@@ -203,3 +203,7 @@ export const ListItemsStatus = {
   out: 'out',
 } as const;
 
+export type ListProductsParams = {
+search?: string;
+};
+

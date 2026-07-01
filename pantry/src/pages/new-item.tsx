@@ -25,6 +25,7 @@ import {
 import { ArrowLeft, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { BarcodeScanner } from "@/components/barcode-scanner";
+import { ProductAutocomplete } from "@/components/product-autocomplete";
 import { addDays, addMonths, format } from "date-fns";
 
 type StatusValue = "in_stock" | "low" | "out";
@@ -226,13 +227,20 @@ export default function NewItem() {
             <Label htmlFor="name">
               Name <span className="text-red-500">*</span>
             </Label>
-            <Input
+            <ProductAutocomplete
               id="name"
               placeholder="e.g. Olive Oil"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(val) => setName(val)}
+              onSelectProduct={(product) => {
+                setProductId(product.id);
+                setBarcode(product.barcode || null);
+                setName(product.name);
+                if (product.category) setCategory(product.category);
+                if (product.brand) setBrand(product.brand);
+                if (product.imageUrl) setImageUrl(product.imageUrl);
+              }}
               required
-              autoFocus
             />
           </div>
 

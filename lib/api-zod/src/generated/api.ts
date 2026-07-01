@@ -353,6 +353,10 @@ export const AdjustItemQuantityResponse = zod.object({
 /**
  * @summary List all products in catalog
  */
+export const ListProductsQueryParams = zod.object({
+  "search": zod.coerce.string().optional()
+})
+
 export const ListProductsResponseItem = zod.object({
   "id": zod.number(),
   "barcode": zod.string(),
