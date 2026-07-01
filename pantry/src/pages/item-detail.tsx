@@ -100,6 +100,7 @@ export default function ItemDetail() {
   const [editMinThreshold, setEditMinThreshold] = useState("");
   const [editNotes, setEditNotes] = useState("");
   const [editExpirationDate, setEditExpirationDate] = useState<Date | null>(null);
+  const [editProductId, setEditProductId] = useState<number | null>(null);
 
   const openEditDialog = () => {
     if (item.data) {
@@ -112,6 +113,7 @@ export default function ItemDetail() {
       setEditMinThreshold(item.data.minThreshold !== undefined && item.data.minThreshold !== null ? String(item.data.minThreshold) : "");
       setEditNotes(item.data.notes ?? "");
       setEditExpirationDate(item.data.expirationDate ? new Date(item.data.expirationDate) : null);
+      setEditProductId(item.data.productId ?? null);
     }
     setEditOpen(true);
   };
@@ -186,6 +188,7 @@ export default function ItemDetail() {
           minThreshold: editMinThreshold.trim() ? parseInt(editMinThreshold.trim(), 10) : undefined,
           notes: editNotes.trim() || undefined,
           expirationDate: editExpirationDate ? editExpirationDate.toISOString() : undefined,
+          productId: editProductId,
         },
       },
       {
@@ -262,20 +265,37 @@ export default function ItemDetail() {
       <div className="max-w-lg">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-6">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-serif font-semibold text-foreground tracking-tight truncate">
-              {data.name}
-            </h1>
-            <div className="flex items-center gap-3 mt-1.5 text-sm text-muted-foreground">
-              <span className="bg-secondary/50 px-2 py-0.5 rounded-md text-xs font-medium">
-                {data.category}
-              </span>
-              {data.location && (
-                <span className="flex items-center gap-1 text-xs">
-                  <MapPin className="w-3 h-3" />
-                  {data.location}
-                </span>
+          <div className="flex gap-4 min-w-0 flex-1">
+            {data.product?.imageUrl && (
+              <div className="w-16 h-16 rounded-xl overflow-hidden border border-border/40 shrink-0 bg-muted/20">
+                <img src={data.product.imageUrl} alt={data.name} className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl font-serif font-semibold text-foreground tracking-tight truncate">
+                {data.name}
+              </h1>
+              {data.product?.brand && (
+                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">
+                  {data.product.brand}
+                </p>
               )}
+              <div className="flex items-center gap-3 mt-1.5 text-sm text-muted-foreground">
+                <span className="bg-secondary/50 px-2 py-0.5 rounded-md text-xs font-medium">
+                  {data.category}
+                </span>
+                {data.location && (
+                  <span className="flex items-center gap-1 text-xs">
+                    <MapPin className="w-3 h-3" />
+                    {data.location}
+                  </span>
+                )}
+                {data.product?.barcode && (
+                  <span className="text-xs font-mono bg-secondary/30 px-1.5 py-0.5 rounded">
+                    Barcode: {data.product.barcode}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -389,6 +409,23 @@ export default function ItemDetail() {
                 <DialogTitle className="font-serif">Edit Item</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleEditSave} className="space-y-4 mt-2">
+                {editProductId && (
+                  <div className="bg-secondary/30 border border-card-border rounded-xl p-3 flex items-center justify-between">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Linked Catalog Product</span>
+                      <span className="text-sm font-medium truncate">{item.data?.product?.name || editName}</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-600 hover:bg-red-500/10 h-7 rounded-full text-xs px-3.5 shrink-0 ml-3"
+                      onClick={() => setEditProductId(null)}
+                    >
+                      Unlink
+                    </Button>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="edit-name">Name</Label>
                   <Input

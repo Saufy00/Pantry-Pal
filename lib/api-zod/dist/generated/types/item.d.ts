@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ItemStatus } from './itemStatus';
+import type { Product } from './product';
 export interface Item {
     id: number;
     name: string;
@@ -24,6 +25,9 @@ export interface Item {
     updatedBy?: string | null;
     /** @nullable */
     expirationDate?: Date | null;
+    /** @nullable */
+    productId?: number | null;
+    product?: Product | null;
     createdAt: Date;
     updatedAt: Date;
 }

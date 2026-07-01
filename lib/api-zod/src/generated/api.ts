@@ -39,6 +39,17 @@ export const ListItemsResponseItem = zod.object({
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
+  "productId": zod.number().nullish(),
+  "product": zod.union([zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),zod.null()]).optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -62,7 +73,8 @@ export const CreateItemBody = zod.object({
   "minThreshold": zod.number().optional(),
   "notes": zod.string().optional(),
   "updatedBy": zod.string().optional(),
-  "expirationDate": zod.coerce.date().optional()
+  "expirationDate": zod.coerce.date().optional(),
+  "productId": zod.number().nullish()
 })
 
 export const CreateItemResponse = zod.object({
@@ -77,6 +89,17 @@ export const CreateItemResponse = zod.object({
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
+  "productId": zod.number().nullish(),
+  "product": zod.union([zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),zod.null()]).optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -108,6 +131,17 @@ export const GetNeedsRestockResponseItem = zod.object({
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
+  "productId": zod.number().nullish(),
+  "product": zod.union([zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),zod.null()]).optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -159,6 +193,17 @@ export const GetItemResponse = zod.object({
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
+  "productId": zod.number().nullish(),
+  "product": zod.union([zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),zod.null()]).optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -184,7 +229,8 @@ export const UpdateItemBody = zod.object({
   "minThreshold": zod.number().optional(),
   "notes": zod.string().optional(),
   "updatedBy": zod.string().optional(),
-  "expirationDate": zod.coerce.date().optional()
+  "expirationDate": zod.coerce.date().optional(),
+  "productId": zod.number().nullish()
 })
 
 export const UpdateItemResponse = zod.object({
@@ -199,6 +245,17 @@ export const UpdateItemResponse = zod.object({
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
+  "productId": zod.number().nullish(),
+  "product": zod.union([zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),zod.null()]).optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -238,6 +295,17 @@ export const UpdateItemStatusResponse = zod.object({
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
+  "productId": zod.number().nullish(),
+  "product": zod.union([zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),zod.null()]).optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -266,6 +334,127 @@ export const AdjustItemQuantityResponse = zod.object({
   "notes": zod.string().nullish(),
   "updatedBy": zod.string().nullish(),
   "expirationDate": zod.coerce.date().nullish(),
+  "productId": zod.number().nullish(),
+  "product": zod.union([zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),zod.null()]).optional(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List all products in catalog
+ */
+export const ListProductsResponseItem = zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListProductsResponse = zod.array(ListProductsResponseItem)
+
+
+/**
+ * @summary Create a product in catalog
+ */
+
+
+
+
+export const CreateProductBody = zod.object({
+  "barcode": zod.string().min(1),
+  "name": zod.string().min(1),
+  "brand": zod.string().optional(),
+  "category": zod.string().optional(),
+  "imageUrl": zod.string().optional()
+})
+
+export const CreateProductResponse = zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Look up a product by barcode (locally or externally)
+ */
+export const LookupProductByBarcodeParams = zod.object({
+  "barcode": zod.coerce.string()
+})
+
+export const LookupProductByBarcodeResponse = zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get a product by ID
+ */
+export const GetProductParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetProductResponse = zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update a product
+ */
+export const UpdateProductParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const UpdateProductBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "brand": zod.string().optional(),
+  "category": zod.string().optional(),
+  "imageUrl": zod.string().optional()
+})
+
+export const UpdateProductResponse = zod.object({
+  "id": zod.number(),
+  "barcode": zod.string(),
+  "name": zod.string(),
+  "brand": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })

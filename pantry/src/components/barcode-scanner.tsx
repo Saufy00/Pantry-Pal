@@ -3,11 +3,12 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 import { Button } from "@/components/ui/button";
 import { Camera, X } from "lucide-react";
 import { toast } from "sonner";
+import { lookupProductByBarcode } from "@workspace/api-client-react";
 
 export function BarcodeScanner({
   onProductFound,
 }: {
-  onProductFound: (product: { name: string; category?: string; brand?: string; imageUrl?: string }) => void;
+  onProductFound: (product: { name: string; category?: string; brand?: string; imageUrl?: string; id?: number; barcode?: string }) => void;
 }) {
   const [scanning, setScanning] = useState(false);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
@@ -36,43 +37,28 @@ export function BarcodeScanner({
           
           toast.info("Looking up product...", { id: "barcode-lookup" });
           try {
-            const endpoints = [
-              "https://world.openfoodfacts.org",
-              "https://world.openproductsfacts.org",
-              "https://world.openbeautyfacts.org"
-            ];
-
-            let data = null;
-            for (const baseUrl of endpoints) {
-              const res = await fetch(`${baseUrl}/api/v0/product/${decodedText}.json`);
-              const json = await res.json();
-              if (json.status === 1 && json.product) {
-                data = json;
-                break;
-              }
-            }
-
-            if (data && data.product) {
-              const product = data.product;
-              const name = product.product_name || product.product_name_en;
-              const category = product.categories_tags?.[0]?.replace('en:', '').replace('-', ' ') || '';
-              if (name) {
-                toast.success("Product found!", { id: "barcode-lookup" });
-                onProductFound({
-                  name,
-                  category,
-                  brand: product.brands,
-                  imageUrl: product.image_url,
-                });
-              } else {
-                toast.error("Product name missing in database", { id: "barcode-lookup" });
-              }
+            const product = await lookupProductByBarcode(decodedText);
+            if (product && product.name) {
+              toast.success("Product found!", { id: "barcode-lookup" });
+              onProductFound({
+                name: product.name,
+                category: product.category || undefined,
+                brand: product.brand || undefined,
+                imageUrl: product.imageUrl || undefined,
+                id: product.id,
+                barcode: product.barcode,
+              });
             } else {
-              toast.error("Product not found", { id: "barcode-lookup" });
+              toast.error("Product name missing in database", { id: "barcode-lookup" });
             }
           } catch (err) {
             console.error(err);
-            toast.error("Failed to fetch product details", { id: "barcode-lookup" });
+            toast.error("Product not found in catalog", { id: "barcode-lookup" });
+            // Allow manual creation of item and product
+            onProductFound({
+              name: "",
+              barcode: decodedText,
+            });
           }
         },
         () => {

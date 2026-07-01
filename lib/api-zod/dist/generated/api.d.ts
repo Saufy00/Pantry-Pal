@@ -48,6 +48,35 @@ export declare const ListItemsResponseItem: zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
+    product: zod.ZodOptional<zod.ZodUnion<[zod.ZodObject<{
+        id: zod.ZodNumber;
+        barcode: zod.ZodString;
+        name: zod.ZodString;
+        brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        createdAt: zod.ZodDate;
+        updatedAt: zod.ZodDate;
+    }, "strip", zod.ZodTypeAny, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }>, zod.ZodNull]>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -64,6 +93,17 @@ export declare const ListItemsResponseItem: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -78,6 +118,17 @@ export declare const ListItemsResponseItem: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }>;
 export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     id: zod.ZodNumber;
@@ -91,6 +142,35 @@ export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
+    product: zod.ZodOptional<zod.ZodUnion<[zod.ZodObject<{
+        id: zod.ZodNumber;
+        barcode: zod.ZodString;
+        name: zod.ZodString;
+        brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        createdAt: zod.ZodDate;
+        updatedAt: zod.ZodDate;
+    }, "strip", zod.ZodTypeAny, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }>, zod.ZodNull]>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -107,6 +187,17 @@ export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -121,6 +212,17 @@ export declare const ListItemsResponse: zod.ZodArray<zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }>, "many">;
 /**
  * @summary Add a new stock item
@@ -136,6 +238,7 @@ export declare const CreateItemBody: zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodString>;
     updatedBy: zod.ZodOptional<zod.ZodString>;
     expirationDate: zod.ZodOptional<zod.ZodDate>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
 }, "strip", zod.ZodTypeAny, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -147,6 +250,7 @@ export declare const CreateItemBody: zod.ZodObject<{
     notes?: string | undefined;
     updatedBy?: string | undefined;
     expirationDate?: Date | undefined;
+    productId?: number | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -158,6 +262,7 @@ export declare const CreateItemBody: zod.ZodObject<{
     notes?: string | undefined;
     updatedBy?: string | undefined;
     expirationDate?: Date | undefined;
+    productId?: number | null | undefined;
 }>;
 export declare const CreateItemResponse: zod.ZodObject<{
     id: zod.ZodNumber;
@@ -171,6 +276,35 @@ export declare const CreateItemResponse: zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
+    product: zod.ZodOptional<zod.ZodUnion<[zod.ZodObject<{
+        id: zod.ZodNumber;
+        barcode: zod.ZodString;
+        name: zod.ZodString;
+        brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        createdAt: zod.ZodDate;
+        updatedAt: zod.ZodDate;
+    }, "strip", zod.ZodTypeAny, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }>, zod.ZodNull]>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -187,6 +321,17 @@ export declare const CreateItemResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -201,6 +346,17 @@ export declare const CreateItemResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }>;
 /**
  * @summary Get stock summary counts
@@ -236,6 +392,35 @@ export declare const GetNeedsRestockResponseItem: zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
+    product: zod.ZodOptional<zod.ZodUnion<[zod.ZodObject<{
+        id: zod.ZodNumber;
+        barcode: zod.ZodString;
+        name: zod.ZodString;
+        brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        createdAt: zod.ZodDate;
+        updatedAt: zod.ZodDate;
+    }, "strip", zod.ZodTypeAny, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }>, zod.ZodNull]>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -252,6 +437,17 @@ export declare const GetNeedsRestockResponseItem: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -266,6 +462,17 @@ export declare const GetNeedsRestockResponseItem: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }>;
 export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     id: zod.ZodNumber;
@@ -279,6 +486,35 @@ export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
+    product: zod.ZodOptional<zod.ZodUnion<[zod.ZodObject<{
+        id: zod.ZodNumber;
+        barcode: zod.ZodString;
+        name: zod.ZodString;
+        brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        createdAt: zod.ZodDate;
+        updatedAt: zod.ZodDate;
+    }, "strip", zod.ZodTypeAny, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }>, zod.ZodNull]>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -295,6 +531,17 @@ export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -309,6 +556,17 @@ export declare const GetNeedsRestockResponse: zod.ZodArray<zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }>, "many">;
 /**
  * @summary List all categories with item counts
@@ -414,6 +672,35 @@ export declare const GetItemResponse: zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
+    product: zod.ZodOptional<zod.ZodUnion<[zod.ZodObject<{
+        id: zod.ZodNumber;
+        barcode: zod.ZodString;
+        name: zod.ZodString;
+        brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        createdAt: zod.ZodDate;
+        updatedAt: zod.ZodDate;
+    }, "strip", zod.ZodTypeAny, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }>, zod.ZodNull]>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -430,6 +717,17 @@ export declare const GetItemResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -444,6 +742,17 @@ export declare const GetItemResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }>;
 /**
  * @summary Update a stock item
@@ -466,6 +775,7 @@ export declare const UpdateItemBody: zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodString>;
     updatedBy: zod.ZodOptional<zod.ZodString>;
     expirationDate: zod.ZodOptional<zod.ZodDate>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
 }, "strip", zod.ZodTypeAny, {
     status?: "in_stock" | "low" | "out" | undefined;
     category?: string | undefined;
@@ -477,6 +787,7 @@ export declare const UpdateItemBody: zod.ZodObject<{
     notes?: string | undefined;
     updatedBy?: string | undefined;
     expirationDate?: Date | undefined;
+    productId?: number | null | undefined;
 }, {
     status?: "in_stock" | "low" | "out" | undefined;
     category?: string | undefined;
@@ -488,6 +799,7 @@ export declare const UpdateItemBody: zod.ZodObject<{
     notes?: string | undefined;
     updatedBy?: string | undefined;
     expirationDate?: Date | undefined;
+    productId?: number | null | undefined;
 }>;
 export declare const UpdateItemResponse: zod.ZodObject<{
     id: zod.ZodNumber;
@@ -501,6 +813,35 @@ export declare const UpdateItemResponse: zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
+    product: zod.ZodOptional<zod.ZodUnion<[zod.ZodObject<{
+        id: zod.ZodNumber;
+        barcode: zod.ZodString;
+        name: zod.ZodString;
+        brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        createdAt: zod.ZodDate;
+        updatedAt: zod.ZodDate;
+    }, "strip", zod.ZodTypeAny, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }>, zod.ZodNull]>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -517,6 +858,17 @@ export declare const UpdateItemResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -531,6 +883,17 @@ export declare const UpdateItemResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }>;
 /**
  * @summary Delete a stock item
@@ -575,6 +938,35 @@ export declare const UpdateItemStatusResponse: zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
+    product: zod.ZodOptional<zod.ZodUnion<[zod.ZodObject<{
+        id: zod.ZodNumber;
+        barcode: zod.ZodString;
+        name: zod.ZodString;
+        brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        createdAt: zod.ZodDate;
+        updatedAt: zod.ZodDate;
+    }, "strip", zod.ZodTypeAny, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }>, zod.ZodNull]>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -591,6 +983,17 @@ export declare const UpdateItemStatusResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -605,6 +1008,17 @@ export declare const UpdateItemStatusResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }>;
 /**
  * @summary Increment or decrement item quantity by a delta
@@ -635,6 +1049,35 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
     notes: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     updatedBy: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
     expirationDate: zod.ZodOptional<zod.ZodNullable<zod.ZodDate>>;
+    productId: zod.ZodOptional<zod.ZodNullable<zod.ZodNumber>>;
+    product: zod.ZodOptional<zod.ZodUnion<[zod.ZodObject<{
+        id: zod.ZodNumber;
+        barcode: zod.ZodString;
+        name: zod.ZodString;
+        brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+        createdAt: zod.ZodDate;
+        updatedAt: zod.ZodDate;
+    }, "strip", zod.ZodTypeAny, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }, {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    }>, zod.ZodNull]>>;
     createdAt: zod.ZodDate;
     updatedAt: zod.ZodDate;
 }, "strip", zod.ZodTypeAny, {
@@ -651,6 +1094,17 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
 }, {
     status: "in_stock" | "low" | "out";
     category: string;
@@ -665,6 +1119,256 @@ export declare const AdjustItemQuantityResponse: zod.ZodObject<{
     notes?: string | null | undefined;
     updatedBy?: string | null | undefined;
     expirationDate?: Date | null | undefined;
+    productId?: number | null | undefined;
+    product?: {
+        id: number;
+        name: string;
+        barcode: string;
+        createdAt: Date;
+        updatedAt: Date;
+        category?: string | null | undefined;
+        brand?: string | null | undefined;
+        imageUrl?: string | null | undefined;
+    } | null | undefined;
+}>;
+/**
+ * @summary List all products in catalog
+ */
+export declare const ListProductsResponseItem: zod.ZodObject<{
+    id: zod.ZodNumber;
+    barcode: zod.ZodString;
+    name: zod.ZodString;
+    brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}>;
+export declare const ListProductsResponse: zod.ZodArray<zod.ZodObject<{
+    id: zod.ZodNumber;
+    barcode: zod.ZodString;
+    name: zod.ZodString;
+    brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}>, "many">;
+/**
+ * @summary Create a product in catalog
+ */
+export declare const CreateProductBody: zod.ZodObject<{
+    barcode: zod.ZodString;
+    name: zod.ZodString;
+    brand: zod.ZodOptional<zod.ZodString>;
+    category: zod.ZodOptional<zod.ZodString>;
+    imageUrl: zod.ZodOptional<zod.ZodString>;
+}, "strip", zod.ZodTypeAny, {
+    name: string;
+    barcode: string;
+    category?: string | undefined;
+    brand?: string | undefined;
+    imageUrl?: string | undefined;
+}, {
+    name: string;
+    barcode: string;
+    category?: string | undefined;
+    brand?: string | undefined;
+    imageUrl?: string | undefined;
+}>;
+export declare const CreateProductResponse: zod.ZodObject<{
+    id: zod.ZodNumber;
+    barcode: zod.ZodString;
+    name: zod.ZodString;
+    brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}>;
+/**
+ * @summary Look up a product by barcode (locally or externally)
+ */
+export declare const LookupProductByBarcodeParams: zod.ZodObject<{
+    barcode: zod.ZodString;
+}, "strip", zod.ZodTypeAny, {
+    barcode: string;
+}, {
+    barcode: string;
+}>;
+export declare const LookupProductByBarcodeResponse: zod.ZodObject<{
+    id: zod.ZodNumber;
+    barcode: zod.ZodString;
+    name: zod.ZodString;
+    brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}>;
+/**
+ * @summary Get a product by ID
+ */
+export declare const GetProductParams: zod.ZodObject<{
+    id: zod.ZodNumber;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+}, {
+    id: number;
+}>;
+export declare const GetProductResponse: zod.ZodObject<{
+    id: zod.ZodNumber;
+    barcode: zod.ZodString;
+    name: zod.ZodString;
+    brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}>;
+/**
+ * @summary Update a product
+ */
+export declare const UpdateProductParams: zod.ZodObject<{
+    id: zod.ZodNumber;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+}, {
+    id: number;
+}>;
+export declare const UpdateProductBody: zod.ZodObject<{
+    name: zod.ZodOptional<zod.ZodString>;
+    brand: zod.ZodOptional<zod.ZodString>;
+    category: zod.ZodOptional<zod.ZodString>;
+    imageUrl: zod.ZodOptional<zod.ZodString>;
+}, "strip", zod.ZodTypeAny, {
+    category?: string | undefined;
+    name?: string | undefined;
+    brand?: string | undefined;
+    imageUrl?: string | undefined;
+}, {
+    category?: string | undefined;
+    name?: string | undefined;
+    brand?: string | undefined;
+    imageUrl?: string | undefined;
+}>;
+export declare const UpdateProductResponse: zod.ZodObject<{
+    id: zod.ZodNumber;
+    barcode: zod.ZodString;
+    name: zod.ZodString;
+    brand: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    category: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    imageUrl: zod.ZodOptional<zod.ZodNullable<zod.ZodString>>;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+}, "strip", zod.ZodTypeAny, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
+}, {
+    id: number;
+    name: string;
+    barcode: string;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: string | null | undefined;
+    brand?: string | null | undefined;
+    imageUrl?: string | null | undefined;
 }>;
 /**
  * @summary List custom shopping list items

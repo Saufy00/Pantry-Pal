@@ -68,29 +68,41 @@ export function ItemCard({ item, hideCategory }: ItemCardProps) {
 
         {/* Name + status badge */}
         <div className="flex justify-between items-start gap-3">
-          <div className="flex-1 min-w-0 flex flex-col gap-1">
-            <h3 className="font-medium text-foreground text-base leading-tight group-hover:text-primary transition-colors truncate">
-              {item.name}
-            </h3>
-            {(() => {
-              const badges = [];
-              if (item.minThreshold !== undefined && item.minThreshold !== null && currentQty <= item.minThreshold) {
-                badges.push(<span key="low" className="w-fit text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-md flex items-center gap-1">Low Stock</span>);
-              }
-              if (item.expirationDate) {
-                const expDate = startOfDay(new Date(item.expirationDate));
-                const now = startOfDay(new Date());
-                if (isBefore(expDate, now)) {
-                  badges.push(<span key="exp" className="w-fit text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> Expired</span>);
-                } else {
-                  const days = differenceInDays(expDate, now);
-                  if (days <= 14) {
-                    badges.push(<span key="exp-soon" className="w-fit text-[10px] font-semibold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> {days}d left</span>);
+          <div className="flex gap-3 min-w-0 flex-1">
+            {item.product?.imageUrl && (
+              <div className="w-12 h-12 rounded-lg overflow-hidden border border-border/40 shrink-0 bg-muted/20">
+                <img src={item.product.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0 flex flex-col gap-1">
+              <h3 className="font-medium text-foreground text-base leading-tight group-hover:text-primary transition-colors truncate">
+                {item.name}
+              </h3>
+              {item.product?.brand && (
+                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                  {item.product.brand}
+                </span>
+              )}
+              {(() => {
+                const badges = [];
+                if (item.minThreshold !== undefined && item.minThreshold !== null && currentQty <= item.minThreshold) {
+                  badges.push(<span key="low" className="w-fit text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-md flex items-center gap-1">Low Stock</span>);
+                }
+                if (item.expirationDate) {
+                  const expDate = startOfDay(new Date(item.expirationDate));
+                  const now = startOfDay(new Date());
+                  if (isBefore(expDate, now)) {
+                    badges.push(<span key="exp" className="w-fit text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> Expired</span>);
+                  } else {
+                    const days = differenceInDays(expDate, now);
+                    if (days <= 14) {
+                      badges.push(<span key="exp-soon" className="w-fit text-[10px] font-semibold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-3 h-3" /> {days}d left</span>);
+                    }
                   }
                 }
-              }
-              return badges.length > 0 ? <div className="flex flex-wrap gap-1 mt-1">{badges}</div> : null;
-            })()}
+                return badges.length > 0 ? <div className="flex flex-wrap gap-1 mt-1">{badges}</div> : null;
+              })()}
+            </div>
           </div>
           <button
             onClick={handleStatusCycle}

@@ -18,6 +18,20 @@ export const ItemStatus = {
   out: 'out',
 } as const;
 
+export interface Product {
+  id: number;
+  barcode: string;
+  name: string;
+  /** @nullable */
+  brand?: string | null;
+  /** @nullable */
+  category?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Item {
   id: number;
   name: string;
@@ -36,6 +50,9 @@ export interface Item {
   updatedBy?: string | null;
   /** @nullable */
   expirationDate?: string | null;
+  /** @nullable */
+  productId?: number | null;
+  product?: Product | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -62,6 +79,8 @@ export interface ItemInput {
   notes?: string;
   updatedBy?: string;
   expirationDate?: string;
+  /** @nullable */
+  productId?: number | null;
 }
 
 export type ItemUpdateStatus = typeof ItemUpdateStatus[keyof typeof ItemUpdateStatus];
@@ -85,6 +104,8 @@ export interface ItemUpdate {
   notes?: string;
   updatedBy?: string;
   expirationDate?: string;
+  /** @nullable */
+  productId?: number | null;
 }
 
 export type StatusUpdateStatus = typeof StatusUpdateStatus[keyof typeof StatusUpdateStatus];
@@ -146,6 +167,24 @@ export interface ShoppingItemUpdate {
   /** @minLength 1 */
   name?: string;
   checked?: boolean;
+}
+
+export interface ProductInput {
+  /** @minLength 1 */
+  barcode: string;
+  /** @minLength 1 */
+  name: string;
+  brand?: string;
+  category?: string;
+  imageUrl?: string;
+}
+
+export interface ProductUpdate {
+  /** @minLength 1 */
+  name?: string;
+  brand?: string;
+  category?: string;
+  imageUrl?: string;
 }
 
 export type ListItemsParams = {

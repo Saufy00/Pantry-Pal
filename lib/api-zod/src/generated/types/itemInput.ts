@@ -20,4 +20,6 @@ export interface ItemInput {
   notes?: string;
   updatedBy?: string;
   expirationDate?: Date;
+  /** @nullable */
+  productId?: number | null;
 }

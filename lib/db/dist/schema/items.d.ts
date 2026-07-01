@@ -20,6 +20,23 @@ export declare const itemsTable: import("drizzle-orm/pg-core").PgTableWithColumn
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
+        productId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "product_id";
+            tableName: "items";
+            dataType: "number";
+            columnType: "PgInteger";
+            data: number;
+            driverParam: string | number;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
         name: import("drizzle-orm/pg-core").PgColumn<{
             name: "name";
             tableName: "items";
@@ -230,6 +247,7 @@ export declare const itemsTable: import("drizzle-orm/pg-core").PgTableWithColumn
 export declare const insertItemSchema: z.ZodObject<{
     name: z.ZodString;
     category: z.ZodString;
+    productId: z.ZodOptional<z.ZodNullable<z.ZodInt>>;
     location: z.ZodOptional<z.ZodString>;
     status: z.ZodOptional<z.ZodString>;
     quantity: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -245,6 +263,7 @@ export declare const insertItemSchema: z.ZodObject<{
 export declare const updateItemSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
     category: z.ZodOptional<z.ZodString>;
+    productId: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodInt>>>;
     location: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     status: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     quantity: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;

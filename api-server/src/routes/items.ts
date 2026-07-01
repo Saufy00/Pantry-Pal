@@ -14,8 +14,14 @@ import {
   UpdateShoppingItemParams,
   UpdateShoppingItemBody,
   DeleteShoppingItemParams,
+  CreateProductBody,
+  LookupProductByBarcodeParams,
+  GetProductParams,
+  UpdateProductParams,
+  UpdateProductBody,
 } from "@workspace/api-zod";
 import * as itemsService from "../services/items.service";
+import * as productsService from "../services/products.service";
 import { badRequest, created, noContent, notFound } from "../utils/response";
 import { addSseClient, removeSseClient, broadcast } from "../lib/sse";
 
@@ -193,6 +199,54 @@ router.delete("/shopping/:id", async (req, res) => {
   await itemsService.deleteShoppingItem(parsed.data.id);
   broadcast("shopping:deleted", { id: parsed.data.id });
   return noContent(res);
+});
+
+// ── Product Catalog endpoints ──────────────────────────────────────────────────
+
+router.get("/products/barcode/:barcode", async (req, res) => {
+  const parsed = LookupProductByBarcodeParams.safeParse({ barcode: req.params.barcode });
+  if (!parsed.success) return badRequest(res, "Invalid barcode");
+
+  const product = await productsService.lookupAndCacheProduct(parsed.data.barcode);
+  if (!product) return notFound(res, "Product not found");
+
+  return res.json(product);
+});
+
+router.get("/products", async (_req, res) => {
+  const products = await productsService.listProducts();
+  return res.json(products);
+});
+
+router.post("/products", async (req, res) => {
+  const parsed = CreateProductBody.safeParse(req.body);
+  if (!parsed.success) return badRequest(res, "Invalid input", parsed.error.issues);
+
+  const product = await productsService.createProduct(parsed.data);
+  broadcast("product:created", { id: product.id });
+  return created(res, product);
+});
+
+router.get("/products/:id", async (req, res) => {
+  const parsed = GetProductParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) return badRequest(res);
+
+  const product = await productsService.getProductById(parsed.data.id);
+  if (!product) return notFound(res, "Product not found");
+
+  return res.json(product);
+});
+
+router.patch("/products/:id", async (req, res) => {
+  const parsedParams = UpdateProductParams.safeParse({ id: Number(req.params.id) });
+  const parsedBody = UpdateProductBody.safeParse(req.body);
+  if (!parsedParams.success || !parsedBody.success) return badRequest(res);
+
+  const product = await productsService.updateProduct(parsedParams.data.id, parsedBody.data);
+  if (!product) return notFound(res, "Product not found");
+
+  broadcast("product:updated", { id: product.id });
+  return res.json(product);
 });
 
 export default router;

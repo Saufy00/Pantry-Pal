@@ -1,5 +1,5 @@
 import type { QueryKey, UseMutationOptions, UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { CategoryCount, HealthStatus, Item, ItemInput, ItemUpdate, ItemsSummary, ListItemsParams, LocationCount, QuantityAdjust, ShoppingItem, ShoppingItemInput, ShoppingItemUpdate, StatusUpdate } from './api.schemas';
+import type { CategoryCount, HealthStatus, Item, ItemInput, ItemUpdate, ItemsSummary, ListItemsParams, LocationCount, Product, ProductInput, ProductUpdate, QuantityAdjust, ShoppingItem, ShoppingItemInput, ShoppingItemUpdate, StatusUpdate } from './api.schemas';
 import { customFetch } from '../custom-fetch';
 import type { ErrorType, BodyType } from '../custom-fetch';
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -312,6 +312,133 @@ export declare const useAdjustItemQuantity: <TError = ErrorType<void>, TContext 
 }) => UseMutationResult<Awaited<ReturnType<typeof adjustItemQuantity>>, TError, {
     id: number;
     data: BodyType<QuantityAdjust>;
+}, TContext>;
+export declare const getListProductsUrl: () => string;
+/**
+ * @summary List all products in catalog
+ */
+export declare const listProducts: (options?: RequestInit) => Promise<Product[]>;
+export declare const getListProductsQueryKey: () => readonly ["/api/products"];
+export declare const getListProductsQueryOptions: <TData = Awaited<ReturnType<typeof listProducts>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listProducts>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof listProducts>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type ListProductsQueryResult = NonNullable<Awaited<ReturnType<typeof listProducts>>>;
+export type ListProductsQueryError = ErrorType<unknown>;
+/**
+ * @summary List all products in catalog
+ */
+export declare function useListProducts<TData = Awaited<ReturnType<typeof listProducts>>, TError = ErrorType<unknown>>(options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listProducts>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getCreateProductUrl: () => string;
+/**
+ * @summary Create a product in catalog
+ */
+export declare const createProduct: (productInput: ProductInput, options?: RequestInit) => Promise<Product>;
+export declare const getCreateProductMutationOptions: <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof createProduct>>, TError, {
+        data: BodyType<ProductInput>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationOptions<Awaited<ReturnType<typeof createProduct>>, TError, {
+    data: BodyType<ProductInput>;
+}, TContext>;
+export type CreateProductMutationResult = NonNullable<Awaited<ReturnType<typeof createProduct>>>;
+export type CreateProductMutationBody = BodyType<ProductInput>;
+export type CreateProductMutationError = ErrorType<unknown>;
+/**
+* @summary Create a product in catalog
+*/
+export declare const useCreateProduct: <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof createProduct>>, TError, {
+        data: BodyType<ProductInput>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationResult<Awaited<ReturnType<typeof createProduct>>, TError, {
+    data: BodyType<ProductInput>;
+}, TContext>;
+export declare const getLookupProductByBarcodeUrl: (barcode: string) => string;
+/**
+ * @summary Look up a product by barcode (locally or externally)
+ */
+export declare const lookupProductByBarcode: (barcode: string, options?: RequestInit) => Promise<Product>;
+export declare const getLookupProductByBarcodeQueryKey: (barcode: string) => readonly [`/api/products/barcode/${string}`];
+export declare const getLookupProductByBarcodeQueryOptions: <TData = Awaited<ReturnType<typeof lookupProductByBarcode>>, TError = ErrorType<void>>(barcode: string, options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof lookupProductByBarcode>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof lookupProductByBarcode>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type LookupProductByBarcodeQueryResult = NonNullable<Awaited<ReturnType<typeof lookupProductByBarcode>>>;
+export type LookupProductByBarcodeQueryError = ErrorType<void>;
+/**
+ * @summary Look up a product by barcode (locally or externally)
+ */
+export declare function useLookupProductByBarcode<TData = Awaited<ReturnType<typeof lookupProductByBarcode>>, TError = ErrorType<void>>(barcode: string, options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof lookupProductByBarcode>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getGetProductUrl: (id: number) => string;
+/**
+ * @summary Get a product by ID
+ */
+export declare const getProduct: (id: number, options?: RequestInit) => Promise<Product>;
+export declare const getGetProductQueryKey: (id: number) => readonly [`/api/products/${number}`];
+export declare const getGetProductQueryOptions: <TData = Awaited<ReturnType<typeof getProduct>>, TError = ErrorType<void>>(id: number, options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getProduct>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseQueryOptions<Awaited<ReturnType<typeof getProduct>>, TError, TData> & {
+    queryKey: QueryKey;
+};
+export type GetProductQueryResult = NonNullable<Awaited<ReturnType<typeof getProduct>>>;
+export type GetProductQueryError = ErrorType<void>;
+/**
+ * @summary Get a product by ID
+ */
+export declare function useGetProduct<TData = Awaited<ReturnType<typeof getProduct>>, TError = ErrorType<void>>(id: number, options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getProduct>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+};
+export declare const getUpdateProductUrl: (id: number) => string;
+/**
+ * @summary Update a product
+ */
+export declare const updateProduct: (id: number, productUpdate: ProductUpdate, options?: RequestInit) => Promise<Product>;
+export declare const getUpdateProductMutationOptions: <TError = ErrorType<void>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof updateProduct>>, TError, {
+        id: number;
+        data: BodyType<ProductUpdate>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationOptions<Awaited<ReturnType<typeof updateProduct>>, TError, {
+    id: number;
+    data: BodyType<ProductUpdate>;
+}, TContext>;
+export type UpdateProductMutationResult = NonNullable<Awaited<ReturnType<typeof updateProduct>>>;
+export type UpdateProductMutationBody = BodyType<ProductUpdate>;
+export type UpdateProductMutationError = ErrorType<void>;
+/**
+* @summary Update a product
+*/
+export declare const useUpdateProduct: <TError = ErrorType<void>, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof updateProduct>>, TError, {
+        id: number;
+        data: BodyType<ProductUpdate>;
+    }, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+}) => UseMutationResult<Awaited<ReturnType<typeof updateProduct>>, TError, {
+    id: number;
+    data: BodyType<ProductUpdate>;
 }, TContext>;
 export declare const getListShoppingItemsUrl: () => string;
 /**

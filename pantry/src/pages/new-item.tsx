@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Layout } from "@/components/layout";
 import {
   useCreateItem,
+  useCreateProduct,
   getListItemsQueryKey,
   getGetItemsSummaryQueryKey,
   getGetNeedsRestockQueryKey,
@@ -43,6 +44,14 @@ export default function NewItem() {
   const [notes, setNotes] = useState("");
   const [expirationDate, setExpirationDate] = useState<Date | null>(null);
 
+  // Product catalog states
+  const [productId, setProductId] = useState<number | null>(null);
+  const [barcode, setBarcode] = useState<string | null>(null);
+  const [brand, setBrand] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+
+  const createProduct = useCreateProduct();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -51,45 +60,74 @@ export default function NewItem() {
       return;
     }
 
-    createItem.mutate(
-      {
-        data: {
-          name: name.trim(),
-          category: category.trim(),
-          location: location.trim() || "Pantry",
-          status,
-          quantity: quantity.trim() || undefined,
-          unit: unit.trim() || undefined,
-          minThreshold: minThreshold.trim() ? parseInt(minThreshold.trim(), 10) : undefined,
-          notes: notes.trim() || undefined,
-          expirationDate: expirationDate ? expirationDate.toISOString() : undefined,
+    const performCreateItem = (linkedProductId?: number) => {
+      createItem.mutate(
+        {
+          data: {
+            name: name.trim(),
+            category: category.trim(),
+            location: location.trim() || "Pantry",
+            status,
+            quantity: quantity.trim() || undefined,
+            unit: unit.trim() || undefined,
+            minThreshold: minThreshold.trim() ? parseInt(minThreshold.trim(), 10) : undefined,
+            notes: notes.trim() || undefined,
+            expirationDate: expirationDate ? expirationDate.toISOString() : undefined,
+            productId: linkedProductId ?? productId ?? undefined,
+          },
         },
-      },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: getListItemsQueryKey(),
-          });
-          queryClient.invalidateQueries({
-            queryKey: getGetItemsSummaryQueryKey(),
-          });
-          queryClient.invalidateQueries({
-            queryKey: getGetNeedsRestockQueryKey(),
-          });
-          queryClient.invalidateQueries({
-            queryKey: getListCategoriesQueryKey(),
-          });
-          queryClient.invalidateQueries({
-            queryKey: getListLocationsQueryKey(),
-          });
-          toast.success(`"${name.trim()}" added to your pantry!`);
-          navigate("/items");
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({
+              queryKey: getListItemsQueryKey(),
+            });
+            queryClient.invalidateQueries({
+              queryKey: getGetItemsSummaryQueryKey(),
+            });
+            queryClient.invalidateQueries({
+              queryKey: getGetNeedsRestockQueryKey(),
+            });
+            queryClient.invalidateQueries({
+              queryKey: getListCategoriesQueryKey(),
+            });
+            queryClient.invalidateQueries({
+              queryKey: getListLocationsQueryKey(),
+            });
+            toast.success(`"${name.trim()}" added to your pantry!`);
+            navigate("/items");
+          },
+          onError: () => {
+            toast.error("Failed to create item. Please try again.");
+          },
+        }
+      );
+    };
+
+    if (barcode && !productId) {
+      // Create product in catalog first
+      createProduct.mutate(
+        {
+          data: {
+            barcode,
+            name: name.trim(),
+            brand: brand.trim() || undefined,
+            category: category.trim(),
+            imageUrl: imageUrl.trim() || undefined,
+          },
         },
-        onError: () => {
-          toast.error("Failed to create item. Please try again.");
-        },
-      }
-    );
+        {
+          onSuccess: (newProduct) => {
+            performCreateItem(newProduct.id);
+          },
+          onError: () => {
+            toast.error("Failed to save product in catalog. Creating item independently.");
+            performCreateItem();
+          },
+        }
+      );
+    } else {
+      performCreateItem();
+    }
   };
 
   return (
@@ -115,11 +153,73 @@ export default function NewItem() {
           {/* Barcode Scanner */}
           <BarcodeScanner 
             onProductFound={(product) => {
-              if (product.name) setName(product.name);
-              if (product.category && !category) setCategory(product.category);
-              if (product.imageUrl) setNotes((prev) => prev ? `${prev}\nImage: ${product.imageUrl}` : `Image: ${product.imageUrl}`);
+              if (product.id) {
+                setProductId(product.id);
+                setBarcode(product.barcode || null);
+                setName(product.name);
+                if (product.category) setCategory(product.category);
+                if (product.brand) setBrand(product.brand);
+                if (product.imageUrl) setImageUrl(product.imageUrl);
+              } else if (product.barcode) {
+                setProductId(null);
+                setBarcode(product.barcode);
+                setName(product.name || "");
+                if (product.category) setCategory(product.category);
+                if (product.brand) setBrand(product.brand);
+                if (product.imageUrl) setImageUrl(product.imageUrl);
+                toast.info("Scanned barcode not in catalog. Fill in details to register it.");
+              }
             }} 
           />
+
+          {barcode && (
+            <div className="bg-secondary/30 border border-card-border rounded-xl p-4 space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Product Details (Barcode: {barcode})
+                </span>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-6 text-red-500 hover:text-red-600 px-2 rounded-full text-xs" 
+                  onClick={() => {
+                    setBarcode(null);
+                    setProductId(null);
+                    setBrand("");
+                    setImageUrl("");
+                  }}
+                >
+                  Clear Barcode
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="brand">Brand</Label>
+                  <Input
+                    id="brand"
+                    placeholder="e.g. Kleenex"
+                    value={brand}
+                    onChange={(e) => setBrand(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="imageUrl">Image URL</Label>
+                  <Input
+                    id="imageUrl"
+                    placeholder="e.g. https://..."
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                  />
+                </div>
+              </div>
+              {imageUrl && (
+                <div className="w-16 h-16 rounded-lg overflow-hidden border bg-background mt-2">
+                  <img src={imageUrl} alt="Product Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Name */}
           <div className="space-y-2">

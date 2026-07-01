@@ -19,4 +19,6 @@ export interface ItemUpdate {
   notes?: string;
   updatedBy?: string;
   expirationDate?: Date;
+  /** @nullable */
+  productId?: number | null;
 }

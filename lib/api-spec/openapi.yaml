@@ -254,6 +254,105 @@ paths:
         "404":
           description: Not found
 
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all products in catalog
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product in catalog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/barcode/{barcode}:
+    get:
+      operationId: lookupProductByBarcode
+      tags: [products]
+      summary: Look up a product by barcode (locally or externally)
+      parameters:
+        - name: barcode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+
   /shopping:
     get:
       operationId: listShoppingItems
@@ -364,6 +463,12 @@ components:
         expirationDate:
           type: ["string", "null"]
           format: date-time
+        productId:
+          type: ["integer", "null"]
+        product:
+          anyOf:
+            - $ref: "#/components/schemas/Product"
+            - type: "null"
         createdAt:
           type: string
           format: date-time
@@ -399,6 +504,8 @@ components:
         expirationDate:
           type: string
           format: date-time
+        productId:
+          type: ["integer", "null"]
 
     ItemUpdate:
       type: object
@@ -426,6 +533,8 @@ components:
         expirationDate:
           type: string
           format: date-time
+        productId:
+          type: ["integer", "null"]
 
     StatusUpdate:
       type: object
@@ -521,3 +630,56 @@ components:
           minLength: 1
         checked:
           type: boolean
+
+    Product:
+      type: object
+      required: [id, barcode, name, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        barcode:
+          type: string
+        name:
+          type: string
+        brand:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProductInput:
+      type: object
+      required: [barcode, name]
+      properties:
+        barcode:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+        brand:
+          type: string
+        category:
+          type: string
+        imageUrl:
+          type: string
+
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        brand:
+          type: string
+        category:
+          type: string
+        imageUrl:
+          type: string
