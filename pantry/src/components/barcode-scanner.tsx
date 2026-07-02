@@ -1,122 +1,121 @@
 import { useEffect, useRef, useState } from "react";
-import { Html5QrcodeScanner } from "html5-qrcode";
-import { Button } from "@/components/ui/button";
-import { Camera, X } from "lucide-react";
-import { toast } from "sonner";
-import { lookupProductByBarcode } from "@workspace/api-client-react";
-import { getCachedProductByBarcode, saveCachedProduct } from "@/utils/db-cache";
+import { Html5Qrcode } from "html5-qrcode";
+import { triggerHaptic } from "@/utils/scan-feedback";
 
-export function BarcodeScanner({
-  onProductFound,
-}: {
-  onProductFound: (product: { name: string; category?: string; brand?: string; imageUrl?: string; id?: number; barcode?: string }) => void;
-}) {
-  const [scanning, setScanning] = useState(false);
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+export type ScanError = {
+  type: "permission_denied" | "camera_unavailable" | "camera_in_use" | "unknown";
+  message: string;
+};
 
+export interface BarcodeScannerProps {
+  onScan: (barcode: string) => void;
+  onError?: (error: ScanError) => void;
+  paused?: boolean;
+  active?: boolean;
+}
+
+export function BarcodeScanner({ 
+  onScan, 
+  onError, 
+  paused = false, 
+  active = true 
+}: BarcodeScannerProps) {
+  const containerId = "barcode-reader-internal";
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isProcessingRef = useRef<boolean>(false);
+  const [flash, setFlash] = useState(false);
+
+  // Initialize and cleanup camera
   useEffect(() => {
-    return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
-      }
+    if (!active) return;
+
+    // Html5Qrcode requires the DOM element ID
+    const scanner = new Html5Qrcode(containerId);
+    scannerRef.current = scanner;
+
+    const onDecodeSuccess = (decodedText: string) => {
+      // Scan-lock to prevent multiple emissions for the same scan event
+      // State 3 = PAUSED
+      if (isProcessingRef.current || scannerRef.current?.getState() === 3) return;
+      
+      isProcessingRef.current = true;
+      
+      // Visual & Haptic feedback
+      setFlash(true);
+      setTimeout(() => setFlash(false), 300);
+      triggerHaptic(50);
+      
+      onScan(decodedText);
     };
-  }, []);
 
-  const startScanner = () => {
-    setScanning(true);
-    setTimeout(() => {
-      scannerRef.current = new Html5QrcodeScanner(
-        "barcode-reader",
-        { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.777778 },
-        false
-      );
-      scannerRef.current.render(
-        async (decodedText) => {
-          // Stop scanner first
-          scannerRef.current?.clear().catch(console.error);
-          setScanning(false);
-          
-          toast.info("Looking up product...", { id: "barcode-lookup" });
-          try {
-            // 1. Try local cache first
-            const cachedProduct = await getCachedProductByBarcode(decodedText);
-            if (cachedProduct) {
-              toast.success("Product found in local cache!", { id: "barcode-lookup" });
-              onProductFound({
-                name: cachedProduct.name,
-                category: cachedProduct.category || undefined,
-                brand: cachedProduct.brand || undefined,
-                imageUrl: cachedProduct.imageUrl || undefined,
-                id: cachedProduct.id,
-                barcode: cachedProduct.barcode,
-              });
-              return;
-            }
+    const onDecodeError = () => {
+      // Silently ignore frame errors, which happen on every frame without a barcode
+    };
 
-            // 2. Fetch from server if cache miss
-            const product = await lookupProductByBarcode(decodedText);
-            if (product && product.name) {
-              toast.success("Product found!", { id: "barcode-lookup" });
-              await saveCachedProduct(product);
-              onProductFound({
-                name: product.name,
-                category: product.category || undefined,
-                brand: product.brand || undefined,
-                imageUrl: product.imageUrl || undefined,
-                id: product.id,
-                barcode: product.barcode,
-              });
-            } else {
-              toast.error("Product name missing in database", { id: "barcode-lookup" });
-            }
-          } catch (err) {
-            console.error(err);
-            toast.error("Product not found in catalog", { id: "barcode-lookup" });
-            // Allow manual creation of item and product
-            onProductFound({
-              name: "",
-              barcode: decodedText,
-            });
-          }
-        },
-        () => {
-          // Ignore frame errors
-        }
-      );
-    }, 100);
-  };
+    scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.777778 },
+      onDecodeSuccess,
+      onDecodeError
+    ).catch((err: any) => {
+      if (!onError) return;
+      const errorMsg = err?.toString().toLowerCase() || "";
+      if (errorMsg.includes("notallowederror") || errorMsg.includes("permission denied")) {
+        onError({ type: "permission_denied", message: "Camera permission denied." });
+      } else if (errorMsg.includes("notfounderror") || errorMsg.includes("no camera") || errorMsg.includes("device not found")) {
+        onError({ type: "camera_unavailable", message: "No camera found." });
+      } else if (errorMsg.includes("notreadableerror") || errorMsg.includes("in use")) {
+        onError({ type: "camera_in_use", message: "Camera is already in use by another application." });
+      } else {
+        onError({ type: "unknown", message: "Failed to initialize camera." });
+      }
+    });
 
-  const cancelScanner = () => {
-    if (scannerRef.current) {
-      scannerRef.current.clear().catch(console.error);
+    return () => {
+      if (scanner.isScanning) {
+        scanner.stop().catch(console.error);
+      }
+      scanner.clear();
+      scannerRef.current = null;
+    };
+  }, [active, onScan, onError]);
+
+  // Handle paused state (freeze/resume)
+  useEffect(() => {
+    if (!scannerRef.current || !active) return;
+
+    // Html5Qrcode states: 1 = NOT_STARTED, 2 = SCANNING, 3 = PAUSED
+    const state = scannerRef.current.getState();
+
+    if (paused && state === 2) {
+      scannerRef.current.pause(true); // true = freeze camera view
+    } else if (!paused && state === 3) {
+      isProcessingRef.current = false;
+      scannerRef.current.resume();
+    } else if (!paused && state === 2) {
+      // Just clear the lock if we are unpaused and already scanning
+      isProcessingRef.current = false;
     }
-    setScanning(false);
-  };
+  }, [paused, active]);
 
-  if (!scanning) {
-    return (
-      <Button
-        variant="outline"
-        type="button"
-        onClick={startScanner}
-        className="w-full flex gap-2 items-center rounded-xl h-12"
-      >
-        <Camera className="w-5 h-5" />
-        Scan Barcode
-      </Button>
-    );
-  }
+  if (!active) return null;
 
   return (
-    <div className="flex flex-col items-center gap-4 border rounded-2xl p-4 bg-muted/20">
-      <div id="barcode-reader" className="w-full max-w-sm rounded-xl overflow-hidden" />
-      <Button variant="ghost" type="button" onClick={cancelScanner} className="text-red-500 hover:text-red-600 hover:bg-red-500/10">
-        <X className="w-4 h-4 mr-2" />
-        Cancel Scan
-      </Button>
-      <p className="text-[10px] text-muted-foreground/60 text-center">
-        Product lookup powered by <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted-foreground">Open Food Facts</a> and its sister projects (ODbL).
-      </p>
+    <div className="relative w-full max-w-md mx-auto overflow-hidden rounded-xl bg-black aspect-[9/16]">
+      <div 
+        id={containerId} 
+        className="w-full h-full object-cover [&>video]:w-full [&>video]:h-full [&>video]:object-cover"
+      />
+      
+      {/* Green flash overlay on detect */}
+      {flash && (
+        <div className="absolute inset-0 border-4 border-green-500 rounded-xl transition-opacity duration-300 pointer-events-none opacity-100 z-10" />
+      )}
+      
+      {/* Dimmed overlay when paused */}
+      {paused && (
+        <div className="absolute inset-0 bg-black/40 transition-opacity duration-300 z-10 pointer-events-none" />
+      )}
     </div>
   );
 }

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Calendar } from "lucide-react";
 import { Link } from "wouter";
-import { BarcodeScanner } from "@/components/barcode-scanner";
+import { ScannerFlow } from "@/components/scanner-flow";
 import { ProductAutocomplete } from "@/components/product-autocomplete";
 import { addDays, addMonths, format } from "date-fns";
 
@@ -151,9 +151,9 @@ export default function NewItem() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Barcode Scanner */}
-          <BarcodeScanner 
-            onProductFound={(product) => {
+          {/* Scanner Flow */}
+          <ScannerFlow 
+            onProductSelected={(product) => {
               if (product.id) {
                 setProductId(product.id);
                 setBarcode(product.barcode || null);
