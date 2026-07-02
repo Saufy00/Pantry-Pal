@@ -49,14 +49,15 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
-app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
-  const message = err instanceof Error ? err.message : "Unknown error";
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  const message = err?.message || "Unknown error";
+  const cause = err?.cause?.message || err?.originalError?.message || "No inner cause";
   if (req.log) {
     req.log.error(err, "Unhandled error");
   } else {
     console.error("Unhandled error:", err);
   }
-  res.status(500).json({ error: "Internal Server Error", detail: message });
+  res.status(500).json({ error: "Internal Server Error", detail: message, cause, fullError: String(err) });
 });
 
 export default app;

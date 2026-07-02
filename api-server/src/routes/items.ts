@@ -172,12 +172,13 @@ router.post("/items", async (req, res) => {
       productId: parsed.data.productId ?? null,
     });
 
-    broadcast("item:created", { id: item.id });
+    // broadcast("item:created", { id: item.id });
     return created(res, item);
-  } catch (err: unknown) {
+  } catch (err: any) {
     req.log.error(err, "Failed to create item");
-    const message = err instanceof Error ? err.message : "Unknown server error";
-    return res.status(500).json({ error: "Failed to create item", detail: message });
+    const message = err?.message || "Unknown server error";
+    const cause = err?.cause?.message || err?.originalError?.message || "No inner cause";
+    return res.status(500).json({ error: "Failed to create item", detail: message, cause, fullError: String(err) });
   }
 });
 
