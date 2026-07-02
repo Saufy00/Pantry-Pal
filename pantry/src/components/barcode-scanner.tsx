@@ -58,7 +58,7 @@ export function BarcodeScanner({
 
     scanner.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.777778 },
+      { fps: 10, qrbox: (viewfinderWidth, viewfinderHeight) => ({ width: Math.min(250, viewfinderWidth * 0.8), height: Math.min(150, viewfinderHeight * 0.8) }) },
       onDecodeSuccess,
       onDecodeError
     ).catch((err: any) => {
