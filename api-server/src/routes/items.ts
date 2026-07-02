@@ -54,6 +54,11 @@ router.get("/events", (req, res) => {
     clearInterval(keepalive);
     removeSseClient(clientId);
   });
+  
+  res.on("error", () => {
+    clearInterval(keepalive);
+    removeSseClient(clientId);
+  });
 });
 
 // ── Read endpoints ─────────────────────────────────────────────────────────
@@ -163,6 +168,7 @@ router.post("/items", async (req, res) => {
     notes: parsed.data.notes,
     updatedBy: parsed.data.updatedBy,
     expirationDate: parsed.data.expirationDate,
+    productId: parsed.data.productId ?? null,
   });
 
   broadcast("item:created", { id: item.id });
