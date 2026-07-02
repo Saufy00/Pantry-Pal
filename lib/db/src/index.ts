@@ -17,6 +17,12 @@ export const pool = new Pool({
   connectionString,
   ssl: isLocal ? false : { rejectUnauthorized: false }
 });
+
+// Catch idle client errors so they don't crash the Node.js process
+pool.on("error", (err) => {
+  console.error("Unexpected error on idle database client", err);
+});
+
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
