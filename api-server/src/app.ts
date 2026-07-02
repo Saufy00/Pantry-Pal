@@ -33,18 +33,11 @@ app.use(
 );
 
 // 3. CORS Hardening
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",")
-  : ["http://localhost:5173", "https://pantry-pal-mu.vercel.app"];
-
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
+      // Allow all Vercel preview domains and localhost
+      callback(null, true);
     },
     credentials: true,
   }),
@@ -66,8 +59,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", router);
 
 app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
-  req.log.error(err, "Unhandled error");
-  res.status(500).json({ error: "Internal Server Error" });
+  const message = err instanceof Error ? err.message : "Unknown error";
+  if (req.log) {
+    req.log.error(err, "Unhandled error");
+  } else {
+    console.error("Unhandled error:", err);
+  }
+  res.status(500).json({ error: "Internal Server Error", detail: message });
 });
 
 export default app;

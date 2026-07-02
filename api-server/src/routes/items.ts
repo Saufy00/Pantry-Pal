@@ -158,24 +158,22 @@ router.post("/items", async (req, res) => {
     const parsed = CreateItemBody.safeParse(req.body);
     if (!parsed.success) return badRequest(res, "Invalid input", parsed.error.issues);
 
-    // MOCK RESPONSE TO ISOLATE CRASH
-    return res.status(201).json({
-      id: 9999,
+    const item = await itemsService.createItem({
       name: parsed.data.name,
       category: parsed.data.category,
-      location: parsed.data.location || "Pantry",
-      status: parsed.data.status || "in_stock",
-      quantity: parsed.data.quantity || null,
-      unit: parsed.data.unit || null,
-      minThreshold: parsed.data.minThreshold || null,
-      notes: parsed.data.notes || null,
-      updatedBy: parsed.data.updatedBy || null,
-      expirationDate: parsed.data.expirationDate || null,
-      productId: parsed.data.productId || null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      product: null
+      location: parsed.data.location,
+      status: parsed.data.status,
+      quantity: parsed.data.quantity,
+      unit: parsed.data.unit,
+      minThreshold: parsed.data.minThreshold,
+      notes: parsed.data.notes,
+      updatedBy: parsed.data.updatedBy,
+      expirationDate: parsed.data.expirationDate,
+      productId: parsed.data.productId ?? null,
     });
+
+    broadcast("item:created", { id: item.id });
+    return created(res, item);
   } catch (err: unknown) {
     req.log.error(err, "Failed to create item");
     const message = err instanceof Error ? err.message : "Unknown server error";
