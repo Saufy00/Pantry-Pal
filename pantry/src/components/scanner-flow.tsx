@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Product } from "@workspace/api-client-react";
+import { Product, Item, useCreateProduct, getListItemsQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { BarcodeScanner, ScanError } from "./barcode-scanner";
 import { resolveProduct } from "@/services/product-resolver";
 import { Button } from "@/components/ui/button";
@@ -14,23 +15,30 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface ScannerFlowProps {
-  onProductSelected: (product: { name: string; category?: string | null; brand?: string | null; imageUrl?: string | null; id?: number; barcode?: string | null }) => void;
+  onProductSelected: (product: Product) => void;
+  onQuickAdd?: (product: Product) => Promise<void>;
 }
 
 type ScannerState =
   | { phase: "idle" }
   | { phase: "scanning" }
   | { phase: "resolving"; barcode: string }
-  | { phase: "found"; product: Product; source: "cache" | "server" }
+  | { phase: "found"; product: Product; source: "cache" | "server"; existingItem?: Item }
+  | { phase: "creating"; barcode: string }
   | { phase: "not_found"; barcode: string }
   | { phase: "error"; barcode: string; message: string }
   | { phase: "added" };
 
-export function ScannerFlow({ onProductSelected }: ScannerFlowProps) {
+export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps) {
   const [state, setState] = useState<ScannerState>({ phase: "idle" });
   const [showMobileWall, setShowMobileWall] = useState(false);
+  const [isQuickAdding, setIsQuickAdding] = useState(false);
+  
+  const queryClient = useQueryClient();
+  const createProductMutation = useCreateProduct();
 
   // Cleanup pending states on unmount
   useEffect(() => {
@@ -43,7 +51,15 @@ export function ScannerFlow({ onProductSelected }: ScannerFlowProps) {
     
     if (result.status === "found") {
       triggerHapticSuccess();
-      setState({ phase: "found", product: result.product, source: result.source });
+      
+      // Duplicate detection via local React Query cache
+      let existingItem: Item | undefined;
+      const cachedItems = queryClient.getQueryData<Item[]>(getListItemsQueryKey());
+      if (cachedItems) {
+        existingItem = cachedItems.find(item => item.productId === result.product.id);
+      }
+      
+      setState({ phase: "found", product: result.product, source: result.source, existingItem });
     } else if (result.status === "not_found") {
       triggerHapticError();
       setState({ phase: "not_found", barcode: result.barcode });
@@ -94,23 +110,53 @@ export function ScannerFlow({ onProductSelected }: ScannerFlowProps) {
                   )}
                 </div>
               </div>
+              
+              {state.existingItem && (
+                <div className="px-4 pb-2">
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-2.5 flex items-center justify-between">
+                    <span className="text-xs font-medium text-primary">Already in Pantry</span>
+                    <span className="text-xs font-semibold text-primary/80 capitalize">
+                      {state.existingItem.status.replace("_", " ")} ({state.existingItem.quantity || 1})
+                      {state.existingItem.location && ` • ${state.existingItem.location}`}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div className="p-4 bg-muted/30 border-t border-border/50 flex flex-col gap-2">
-                <Button 
-                  className="w-full gap-2 rounded-xl"
-                  size="lg"
-                  onClick={() => {
-                    onProductSelected(state.product);
-                    setState({ phase: "added" });
-                    setTimeout(() => setState({ phase: "scanning" }), 1500);
-                  }}
-                >
-                  <Plus className="w-4 h-4" /> Add to Pantry
-                </Button>
-                <div className="flex gap-2">
-                  <Button variant="outline" className="w-full rounded-xl" onClick={() => setState({ phase: "scanning" })}>
-                    Scan Another
+                {onQuickAdd && (
+                  <Button 
+                    className="w-full gap-2 rounded-xl"
+                    size="lg"
+                    disabled={isQuickAdding}
+                    onClick={async () => {
+                      setIsQuickAdding(true);
+                      try {
+                        await onQuickAdd(state.product);
+                        setState({ phase: "added" });
+                      } catch (err) {
+                        toast.error("Failed to add item.");
+                      } finally {
+                        setIsQuickAdding(false);
+                      }
+                    }}
+                  >
+                    {isQuickAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                    {state.existingItem ? "Quick Add Another" : "Quick Add to Pantry"}
                   </Button>
-                  <Button variant="ghost" className="w-full rounded-xl" onClick={() => setState({ phase: "idle" })}>
+                )}
+                <div className="flex gap-2">
+                  <Button 
+                    variant={onQuickAdd ? "outline" : "default"} 
+                    className="w-full rounded-xl" 
+                    onClick={() => {
+                      onProductSelected(state.product);
+                      setState({ phase: "idle" });
+                    }}
+                  >
+                    Review Details
+                  </Button>
+                  <Button variant="ghost" className="w-full rounded-xl" onClick={() => setState({ phase: "scanning" })}>
                     Cancel
                   </Button>
                 </div>
@@ -133,12 +179,9 @@ export function ScannerFlow({ onProductSelected }: ScannerFlowProps) {
               <Button 
                 size="lg" 
                 className="w-full rounded-xl shadow-lg" 
-                onClick={() => {
-                  onProductSelected({ name: "", barcode: state.barcode });
-                  setState({ phase: "idle" });
-                }}
+                onClick={() => setState({ phase: "creating", barcode: state.barcode })}
               >
-                Add Manually
+                Create Product
               </Button>
               <Button variant="outline" className="w-full rounded-xl bg-transparent border-white/20 text-white hover:bg-white/10" onClick={() => setState({ phase: "scanning" })}>
                 Scan Another
@@ -147,6 +190,78 @@ export function ScannerFlow({ onProductSelected }: ScannerFlowProps) {
                 Cancel
               </Button>
             </div>
+          </div>
+        );
+
+      case "creating":
+        return (
+          <div className="absolute inset-0 z-20 flex flex-col p-5 bg-black/95 backdrop-blur-md animate-in slide-in-from-bottom-4 fade-in duration-200 overflow-y-auto">
+            <h3 className="text-xl font-bold text-white mb-1 mt-4">New Product</h3>
+            <p className="text-white/70 text-sm mb-6">
+              Barcode: <span className="font-mono text-white/90">{state.barcode}</span>
+            </p>
+            <form 
+              className="flex flex-col gap-4 flex-1"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                createProductMutation.mutate({
+                  data: {
+                    barcode: state.barcode,
+                    name: (formData.get("name") as string).trim(),
+                    brand: (formData.get("brand") as string).trim() || undefined,
+                    category: (formData.get("category") as string).trim(),
+                  }
+                }, {
+                  onSuccess: async (newProduct) => {
+                    // Automatically add to pantry if Quick Add is available
+                    if (onQuickAdd) {
+                       try {
+                         await onQuickAdd(newProduct);
+                         setState({ phase: "added" });
+                       } catch (err) {
+                         // Fallback to found state if Quick Add fails
+                         setState({ phase: "found", product: newProduct, source: "server" });
+                       }
+                    } else {
+                      setState({ phase: "found", product: newProduct, source: "server" });
+                    }
+                  }
+                });
+              }}
+            >
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/70 font-medium">Product Name <span className="text-red-400">*</span></label>
+                <input name="name" required autoFocus className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Extra Virgin Olive Oil" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/70 font-medium">Brand <span className="text-white/40 font-normal">(Optional)</span></label>
+                <input name="brand" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Kirkland" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/70 font-medium">Category <span className="text-red-400">*</span></label>
+                <input name="category" required className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Cooking, Snacks" />
+              </div>
+              
+              <div className="mt-8 flex flex-col gap-3 pb-4">
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-md font-semibold"
+                  disabled={createProductMutation.isPending}
+                >
+                  {createProductMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save & Add to Pantry"}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  className="w-full rounded-xl text-white/60 hover:text-white hover:bg-white/10" 
+                  onClick={() => setState({ phase: "scanning" })}
+                >
+                  Cancel Scan
+                </Button>
+              </div>
+            </form>
           </div>
         );
 
@@ -171,12 +286,21 @@ export function ScannerFlow({ onProductSelected }: ScannerFlowProps) {
 
       case "added":
         return (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-green-500/90 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-4 ring-2 ring-white/50">
-              <Check className="w-8 h-8 text-white" />
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-green-500/95 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-4 ring-4 ring-white/50 animate-bounce">
+              <Check className="w-10 h-10 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-1">Added!</h3>
-            <p className="text-white/90 font-medium">Ready for next scan</p>
+            <h3 className="text-3xl font-bold text-white mb-2">Added!</h3>
+            <p className="text-white/90 font-medium mb-8">Successfully saved to your pantry.</p>
+            
+            <div className="flex flex-col gap-3 w-full max-w-[280px]">
+              <Button size="lg" className="w-full rounded-xl bg-white text-green-700 hover:bg-white/90 shadow-lg text-lg" onClick={() => setState({ phase: "scanning" })}>
+                Scan Another
+              </Button>
+              <Button variant="ghost" className="w-full rounded-xl text-white hover:bg-white/20" onClick={() => setState({ phase: "idle" })}>
+                Done
+              </Button>
+            </div>
           </div>
         );
 
@@ -222,7 +346,7 @@ export function ScannerFlow({ onProductSelected }: ScannerFlowProps) {
     );
   }
 
-  const isPaused = ["resolving", "found", "not_found", "error", "added"].includes(state.phase);
+  const isPaused = ["resolving", "found", "not_found", "error", "added", "creating"].includes(state.phase);
 
   return (
     <div className="relative w-full max-w-md mx-auto rounded-xl overflow-hidden bg-black shadow-2xl ring-1 ring-white/10 animate-in fade-in duration-300">
