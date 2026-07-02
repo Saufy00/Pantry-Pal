@@ -134,8 +134,8 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
                       try {
                         await onQuickAdd(state.product);
                         setState({ phase: "added" });
-                      } catch (err) {
-                        toast.error("Failed to add item.");
+                      } catch (err: any) {
+                        toast.error(`Failed to add item: ${err?.message || "Unknown error"}`);
                       } finally {
                         setIsQuickAdding(false);
                       }
@@ -219,13 +219,17 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
                        try {
                          await onQuickAdd(newProduct);
                          setState({ phase: "added" });
-                       } catch (err) {
+                       } catch (err: any) {
                          // Fallback to found state if Quick Add fails
+                         toast.error(`Failed to quick add: ${err?.message || "Unknown error"}`);
                          setState({ phase: "found", product: newProduct, source: "server" });
                        }
                     } else {
                       setState({ phase: "found", product: newProduct, source: "server" });
                     }
+                  },
+                  onError: (err: any) => {
+                    toast.error(`Failed to create product: ${err?.message || "Unknown error"}`);
                   }
                 });
               }}

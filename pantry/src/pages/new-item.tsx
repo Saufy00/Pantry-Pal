@@ -81,8 +81,9 @@ export default function NewItem() {
           toast.success(`"${name.trim()}" added to your pantry!`);
           navigate("/items");
         },
-        onError: () => {
-          toast.error("Failed to create item. Please try again.");
+        onError: (err: any) => {
+          toast.error(`Failed to create item: ${err?.message || "Unknown error"}`);
+          console.error("Create item error:", err);
         },
       }
     );
