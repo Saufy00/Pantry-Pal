@@ -5,6 +5,15 @@ import { resolveProduct } from "@/services/product-resolver";
 import { Button } from "@/components/ui/button";
 import { Camera, AlertCircle, Loader2, Plus, X, PackageOpen, Check } from "lucide-react";
 import { triggerHapticSuccess, triggerHapticError } from "@/utils/scan-feedback";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ScannerFlowProps {
   onProductSelected: (product: { name: string; category?: string | null; brand?: string | null; imageUrl?: string | null; id?: number; barcode?: string | null }) => void;
@@ -21,6 +30,7 @@ type ScannerState =
 
 export function ScannerFlow({ onProductSelected }: ScannerFlowProps) {
   const [state, setState] = useState<ScannerState>({ phase: "idle" });
+  const [showMobileWall, setShowMobileWall] = useState(false);
 
   // Cleanup pending states on unmount
   useEffect(() => {
@@ -177,15 +187,38 @@ export function ScannerFlow({ onProductSelected }: ScannerFlowProps) {
 
   if (state.phase === "idle") {
     return (
-      <Button 
-        type="button"
-        onClick={() => setState({ phase: "scanning" })} 
-        className="w-full py-8 border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-all rounded-xl text-primary flex flex-col gap-2 h-auto"
-        variant="outline"
-      >
-        <Camera className="w-6 h-6" />
-        <span className="font-semibold">Scan Barcode</span>
-      </Button>
+      <>
+        <Button 
+          type="button"
+          onClick={() => {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+              setShowMobileWall(true);
+            } else {
+              setState({ phase: "scanning" });
+            }
+          }} 
+          className="w-full py-8 border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-all rounded-xl text-primary flex flex-col gap-2 h-auto"
+          variant="outline"
+        >
+          <Camera className="w-6 h-6" />
+          <span className="font-semibold">Scan Barcode</span>
+        </Button>
+
+        <AlertDialog open={showMobileWall} onOpenChange={setShowMobileWall}>
+          <AlertDialogContent className="rounded-2xl max-w-[340px]">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl">Mobile Scanning In Progress</AlertDialogTitle>
+              <AlertDialogDescription className="text-base text-muted-foreground mt-2">
+                We're currently optimizing the barcode scanner hardware integration for mobile devices. Please add items manually for now while we perfect the mobile camera experience.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-4">
+              <AlertDialogAction className="rounded-xl w-full" onClick={() => setShowMobileWall(false)}>Got it</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
     );
   }
 
