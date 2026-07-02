@@ -172,7 +172,7 @@ router.post("/items", async (req, res) => {
       productId: parsed.data.productId ?? null,
     });
 
-    broadcast("item:created", { id: item.id });
+    // broadcast("item:created", { id: item.id });
     return created(res, item);
   } catch (err: unknown) {
     req.log.error(err, "Failed to create item");
