@@ -154,25 +154,31 @@ router.delete("/items/:id", async (req, res) => {
 });
 
 router.post("/items", async (req, res) => {
-  const parsed = CreateItemBody.safeParse(req.body);
-  if (!parsed.success) return badRequest(res, "Invalid input", parsed.error.issues);
+  try {
+    const parsed = CreateItemBody.safeParse(req.body);
+    if (!parsed.success) return badRequest(res, "Invalid input", parsed.error.issues);
 
-  const item = await itemsService.createItem({
-    name: parsed.data.name,
-    category: parsed.data.category,
-    location: parsed.data.location,
-    status: parsed.data.status,
-    quantity: parsed.data.quantity,
-    unit: parsed.data.unit,
-    minThreshold: parsed.data.minThreshold,
-    notes: parsed.data.notes,
-    updatedBy: parsed.data.updatedBy,
-    expirationDate: parsed.data.expirationDate,
-    productId: parsed.data.productId ?? null,
-  });
+    const item = await itemsService.createItem({
+      name: parsed.data.name,
+      category: parsed.data.category,
+      location: parsed.data.location,
+      status: parsed.data.status,
+      quantity: parsed.data.quantity,
+      unit: parsed.data.unit,
+      minThreshold: parsed.data.minThreshold,
+      notes: parsed.data.notes,
+      updatedBy: parsed.data.updatedBy,
+      expirationDate: parsed.data.expirationDate,
+      productId: parsed.data.productId ?? null,
+    });
 
-  broadcast("item:created", { id: item.id });
-  return created(res, item);
+    broadcast("item:created", { id: item.id });
+    return created(res, item);
+  } catch (err: unknown) {
+    req.log.error(err, "Failed to create item");
+    const message = err instanceof Error ? err.message : "Unknown server error";
+    return res.status(500).json({ error: "Failed to create item", detail: message });
+  }
 });
 
 // ── Shopping endpoints ─────────────────────────────────────────────────────

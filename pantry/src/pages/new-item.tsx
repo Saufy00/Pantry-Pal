@@ -82,8 +82,9 @@ export default function NewItem() {
           navigate("/items");
         },
         onError: (err: any) => {
-          toast.error(`Failed to create item: ${err?.message || "Unknown error"}`);
-          console.error("Create item error:", err);
+          const detail = err?.data?.detail || err?.data?.error || err?.message || "Unknown error";
+          toast.error(`Failed to create item: ${detail}`);
+          console.error("Create item error:", err, "data:", err?.data);
         },
       }
     );

@@ -135,7 +135,8 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
                         await onQuickAdd(state.product);
                         setState({ phase: "added" });
                       } catch (err: any) {
-                        toast.error(`Failed to add item: ${err?.message || "Unknown error"}`);
+                        const detail = err?.data?.detail || err?.data?.error || err?.message || "Unknown error";
+                        toast.error(`Failed to add item: ${detail}`);
                       } finally {
                         setIsQuickAdding(false);
                       }
@@ -221,7 +222,8 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
                          setState({ phase: "added" });
                        } catch (err: any) {
                          // Fallback to found state if Quick Add fails
-                         toast.error(`Failed to quick add: ${err?.message || "Unknown error"}`);
+                         const detail = err?.data?.detail || err?.data?.error || err?.message || "Unknown error";
+                         toast.error(`Failed to quick add: ${detail}`);
                          setState({ phase: "found", product: newProduct, source: "server" });
                        }
                     } else {
@@ -229,7 +231,8 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
                     }
                   },
                   onError: (err: any) => {
-                    toast.error(`Failed to create product: ${err?.message || "Unknown error"}`);
+                    const detail = err?.data?.detail || err?.data?.error || err?.message || "Unknown error";
+                    toast.error(`Failed to create product: ${detail}`);
                   }
                 });
               }}
