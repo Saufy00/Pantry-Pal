@@ -35,52 +35,69 @@ export function BarcodeScanner({
   useEffect(() => {
     if (!active) return;
 
-    const scanner = new Html5Qrcode(containerId);
-    scannerRef.current = scanner;
+    let isMounted = true;
+    let scanner: Html5Qrcode | null = null;
 
-    const onDecodeSuccess = (decodedText: string) => {
-      // Scan-lock: skip if already processing or paused (state 3)
-      if (isProcessingRef.current || scannerRef.current?.getState() === 3) return;
+    const initScanner = () => {
+      if (!isMounted) return;
       
-      isProcessingRef.current = true;
-      
-      // Visual & Haptic feedback
-      setFlash(true);
-      setTimeout(() => setFlash(false), 300);
-      triggerHaptic(50);
-      
-      onScanRef.current(decodedText);
+      scanner = new Html5Qrcode(containerId);
+      scannerRef.current = scanner;
+
+      const onDecodeSuccess = (decodedText: string) => {
+        // Scan-lock: skip if already processing or paused (state 3)
+        if (isProcessingRef.current || scannerRef.current?.getState() === 3) return;
+        
+        isProcessingRef.current = true;
+        
+        // Visual & Haptic feedback
+        setFlash(true);
+        setTimeout(() => setFlash(false), 300);
+        triggerHaptic(50);
+        
+        onScanRef.current(decodedText);
+      };
+
+      const onDecodeError = () => {
+        // Silently ignore per-frame decode failures
+      };
+
+      scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: (viewfinderWidth, viewfinderHeight) => ({ width: Math.min(250, viewfinderWidth * 0.8), height: Math.min(150, viewfinderHeight * 0.8) }) },
+        onDecodeSuccess,
+        onDecodeError
+      ).catch((err: any) => {
+        const cb = onErrorRef.current;
+        if (!cb) return;
+        const errorMsg = err?.toString().toLowerCase() || "";
+        if (errorMsg.includes("notallowederror") || errorMsg.includes("permission denied")) {
+          cb({ type: "permission_denied", message: "Camera permission denied." });
+        } else if (errorMsg.includes("notfounderror") || errorMsg.includes("no camera") || errorMsg.includes("device not found")) {
+          cb({ type: "camera_unavailable", message: "No camera found." });
+        } else if (errorMsg.includes("notreadableerror") || errorMsg.includes("in use")) {
+          cb({ type: "camera_in_use", message: "Camera is already in use by another application." });
+        } else {
+          cb({ type: "unknown", message: "Failed to initialize camera." });
+        }
+      });
     };
 
-    const onDecodeError = () => {
-      // Silently ignore per-frame decode failures
-    };
-
-    scanner.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: (viewfinderWidth, viewfinderHeight) => ({ width: Math.min(250, viewfinderWidth * 0.8), height: Math.min(150, viewfinderHeight * 0.8) }) },
-      onDecodeSuccess,
-      onDecodeError
-    ).catch((err: any) => {
-      const cb = onErrorRef.current;
-      if (!cb) return;
-      const errorMsg = err?.toString().toLowerCase() || "";
-      if (errorMsg.includes("notallowederror") || errorMsg.includes("permission denied")) {
-        cb({ type: "permission_denied", message: "Camera permission denied." });
-      } else if (errorMsg.includes("notfounderror") || errorMsg.includes("no camera") || errorMsg.includes("device not found")) {
-        cb({ type: "camera_unavailable", message: "No camera found." });
-      } else if (errorMsg.includes("notreadableerror") || errorMsg.includes("in use")) {
-        cb({ type: "camera_in_use", message: "Camera is already in use by another application." });
-      } else {
-        cb({ type: "unknown", message: "Failed to initialize camera." });
-      }
-    });
+    // Delay initialization to ensure the browser has painted the DOM and calculated 
+    // real CSS dimensions. Fixes "black screen" 0x0 video rendering on Android/Brave.
+    const timerId = setTimeout(initScanner, 150);
 
     return () => {
-      if (scanner.isScanning) {
-        scanner.stop().catch(console.error);
+      isMounted = false;
+      clearTimeout(timerId);
+      
+      if (scanner && scanner.isScanning) {
+        scanner.stop().catch(console.error).finally(() => {
+          scanner?.clear();
+        });
+      } else if (scanner) {
+        scanner.clear();
       }
-      scanner.clear();
       scannerRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
