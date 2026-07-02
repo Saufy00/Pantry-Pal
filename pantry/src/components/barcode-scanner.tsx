@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { triggerHaptic } from "@/utils/scan-feedback";
 
@@ -25,17 +25,21 @@ export function BarcodeScanner({
   const isProcessingRef = useRef<boolean>(false);
   const [flash, setFlash] = useState(false);
 
-  // Initialize and cleanup camera
+  // Stable refs for callbacks so the camera effect doesn't re-fire
+  const onScanRef = useRef(onScan);
+  onScanRef.current = onScan;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
+
+  // Initialize and cleanup camera — only depends on `active`
   useEffect(() => {
     if (!active) return;
 
-    // Html5Qrcode requires the DOM element ID
     const scanner = new Html5Qrcode(containerId);
     scannerRef.current = scanner;
 
     const onDecodeSuccess = (decodedText: string) => {
-      // Scan-lock to prevent multiple emissions for the same scan event
-      // State 3 = PAUSED
+      // Scan-lock: skip if already processing or paused (state 3)
       if (isProcessingRef.current || scannerRef.current?.getState() === 3) return;
       
       isProcessingRef.current = true;
@@ -45,11 +49,11 @@ export function BarcodeScanner({
       setTimeout(() => setFlash(false), 300);
       triggerHaptic(50);
       
-      onScan(decodedText);
+      onScanRef.current(decodedText);
     };
 
     const onDecodeError = () => {
-      // Silently ignore frame errors, which happen on every frame without a barcode
+      // Silently ignore per-frame decode failures
     };
 
     scanner.start(
@@ -58,16 +62,17 @@ export function BarcodeScanner({
       onDecodeSuccess,
       onDecodeError
     ).catch((err: any) => {
-      if (!onError) return;
+      const cb = onErrorRef.current;
+      if (!cb) return;
       const errorMsg = err?.toString().toLowerCase() || "";
       if (errorMsg.includes("notallowederror") || errorMsg.includes("permission denied")) {
-        onError({ type: "permission_denied", message: "Camera permission denied." });
+        cb({ type: "permission_denied", message: "Camera permission denied." });
       } else if (errorMsg.includes("notfounderror") || errorMsg.includes("no camera") || errorMsg.includes("device not found")) {
-        onError({ type: "camera_unavailable", message: "No camera found." });
+        cb({ type: "camera_unavailable", message: "No camera found." });
       } else if (errorMsg.includes("notreadableerror") || errorMsg.includes("in use")) {
-        onError({ type: "camera_in_use", message: "Camera is already in use by another application." });
+        cb({ type: "camera_in_use", message: "Camera is already in use by another application." });
       } else {
-        onError({ type: "unknown", message: "Failed to initialize camera." });
+        cb({ type: "unknown", message: "Failed to initialize camera." });
       }
     });
 
@@ -78,7 +83,8 @@ export function BarcodeScanner({
       scanner.clear();
       scannerRef.current = null;
     };
-  }, [active, onScan, onError]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
 
   // Handle paused state (freeze/resume)
   useEffect(() => {
