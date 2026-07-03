@@ -38,19 +38,16 @@ export function BarcodeScanner({
     let isMounted = true;
     let scanner: Html5Qrcode | null = null;
 
-    const initScanner = () => {
+    const initScanner = async () => {
       if (!isMounted) return;
       
       scanner = new Html5Qrcode(containerId);
       scannerRef.current = scanner;
 
       const onDecodeSuccess = (decodedText: string) => {
-        // Scan-lock: skip if already processing or paused (state 3)
         if (isProcessingRef.current || scannerRef.current?.getState() === 3) return;
         
         isProcessingRef.current = true;
-        
-        // Visual & Haptic feedback
         setFlash(true);
         setTimeout(() => setFlash(false), 300);
         triggerHaptic(50);
@@ -58,20 +55,29 @@ export function BarcodeScanner({
         onScanRef.current(decodedText);
       };
 
-      const onDecodeError = () => {
-        // Silently ignore per-frame decode failures
-      };
-
-      scanner.start(
-        { facingMode: "environment" },
-        { 
-          fps: 10, 
-          qrbox: { width: 250, height: 150 },
-          aspectRatio: 1.0 
-        },
-        onDecodeSuccess,
-        onDecodeError
-      ).catch((err: any) => {
+      try {
+        // Manually fetch cameras to bypass Android facingMode freeze
+        const devices = await Html5Qrcode.getCameras();
+        if (!devices || devices.length === 0) {
+          throw new Error("No camera devices found.");
+        }
+        
+        // Try to find a back camera by label, otherwise default to the last camera (usually back on Android)
+        let backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('environment'));
+        if (!backCamera) backCamera = devices[devices.length - 1];
+        
+        // Pass the exact string ID, which bypasses the facingMode engine
+        await scanner.start(
+          backCamera.id,
+          { 
+            fps: 10, 
+            qrbox: { width: 250, height: 150 },
+            aspectRatio: 1.0 
+          },
+          onDecodeSuccess,
+          () => {} // silent on per-frame decode errors
+        );
+      } catch (err: any) {
         const cb = onErrorRef.current;
         if (!cb) return;
         const errorMsg = err?.toString().toLowerCase() || "";
@@ -82,9 +88,9 @@ export function BarcodeScanner({
         } else if (errorMsg.includes("notreadableerror") || errorMsg.includes("in use")) {
           cb({ type: "camera_in_use", message: "Camera is already in use by another application." });
         } else {
-          cb({ type: "unknown", message: "Failed to initialize camera." });
+          cb({ type: "unknown", message: err?.message || "Failed to initialize camera." });
         }
-      });
+      }
     };
 
     // Delay initialization to ensure the browser has painted the DOM and calculated 
