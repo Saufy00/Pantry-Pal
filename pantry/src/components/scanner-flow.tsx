@@ -38,41 +38,45 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
   const [diagnosticLog, setDiagnosticLog] = useState<string | null>(null);
 
   const runDiagnostics = async () => {
-    setDiagnosticLog("Running diagnostics...");
-    let log = "=== CAMERA DIAGNOSTICS ===\n\n";
+    let log = "=== CAMERA DIAGNOSTICS ===\n";
+    setDiagnosticLog(log);
+    
+    const appendLog = (msg: string) => {
+      log += msg;
+      setDiagnosticLog(log);
+    };
+
     try {
-      log += `UserAgent: ${navigator.userAgent}\n`;
-      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-        log += "FATAL: navigator.mediaDevices API not supported (Check HTTPS / Secure Context).\n";
-        setDiagnosticLog(log);
+      appendLog(`UA: ${navigator.userAgent.slice(0,40)}...\n`);
+      
+      if (!navigator.mediaDevices) {
+        appendLog("FATAL: mediaDevices API missing.\n");
         return;
       }
       
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(d => d.kind === 'videoinput');
-      log += `Found ${videoDevices.length} camera(s):\n`;
-      videoDevices.forEach((d, i) => {
-        log += `[${i}] ${d.label || 'Unnamed Camera'} (ID: ${d.deviceId.slice(0,6)}...)\n`;
-      });
+      appendLog("1. Requesting enumerateDevices()...\n");
+      const devices = await Promise.race([
+        navigator.mediaDevices.enumerateDevices(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("enumerateDevices TIMEOUT (Blocked by Brave?)")), 3000))
+      ]) as MediaDeviceInfo[];
       
-      log += `\nTesting raw getUserMedia({ video: { facingMode: 'environment' } })...\n`;
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const videoDevices = devices.filter(d => d.kind === 'videoinput');
+      appendLog(`-> Found ${videoDevices.length} cameras.\n`);
+      
+      appendLog(`2. Requesting getUserMedia()...\n`);
+      const stream = await Promise.race([
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("getUserMedia TIMEOUT (Blocked by Brave?)")), 3000))
+      ]) as MediaStream;
+      
       const track = stream.getVideoTracks()[0];
-      log += `Success! Track: ${track.label}\n`;
-      const settings = track.getSettings();
-      log += `Resolution: ${settings.width}x${settings.height}\n`;
-      log += `FrameRate: ${settings.frameRate}\n`;
-      log += `Aspect Ratio: ${settings.aspectRatio}\n`;
+      appendLog(`-> Success! Track: ${track.label}\n`);
       
       stream.getTracks().forEach(t => t.stop());
-      log += `\nTest complete. Stream closed.`;
+      appendLog(`Test complete.`);
     } catch (err: any) {
-      log += `\nERROR: ${err.name}\nMESSAGE: ${err.message}\n`;
-      if (err.name === 'NotAllowedError') log += "-> Camera permission denied by browser or Shields.\n";
-      if (err.name === 'NotFoundError') log += "-> No camera matching constraints found.\n";
-      if (err.name === 'NotReadableError') log += "-> Camera is currently in use by another app/tab.\n";
+      appendLog(`\n[!] ERROR: ${err.name || 'Error'}\n[!] MSG: ${err.message}\n`);
     }
-    setDiagnosticLog(log);
   };
   
   const queryClient = useQueryClient();
