@@ -85,12 +85,10 @@ export function BarcodeScanner({
         const stream = await Promise.race([
           navigator.mediaDevices.getUserMedia({ 
             video: { 
-              deviceId: { exact: targetCamera.deviceId },
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
+              deviceId: { exact: targetCamera.deviceId }
             } 
           }),
-          new Promise((_, r) => setTimeout(() => r(new Error("Camera initialization timed out (Driver freeze)")), 2000))
+          new Promise((_, r) => setTimeout(() => r(new Error("Camera initialization timed out (Driver freeze)")), 3000))
         ]) as MediaStream;
         
         if (!isMounted) {
@@ -131,13 +129,15 @@ export function BarcodeScanner({
         setIsSwitching(false);
         const cb = onErrorRef.current;
         if (!cb) return;
-        const msg = err?.message?.toLowerCase() || "";
+        const errMsg = err?.message || err?.toString() || "";
+        const msg = errMsg.toLowerCase();
+        
         if (msg.includes("not allowed") || msg.includes("permission denied")) {
           cb({ type: "permission_denied", message: "Camera permission denied." });
         } else if (msg.includes("not readable") || msg.includes("in use") || msg.includes("concurrent")) {
           cb({ type: "camera_in_use", message: "Camera is busy or releasing lock. Please try again." });
         } else {
-          cb({ type: "unknown", message: err?.message || "Failed to initialize camera." });
+          cb({ type: "unknown", message: `Error: ${errMsg}` });
         }
       }
     };
