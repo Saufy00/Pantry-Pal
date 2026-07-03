@@ -77,6 +77,17 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
             new Promise((_, r) => setTimeout(() => r(new Error("TIMEOUT")), 2500))
           ]) as MediaStream;
           appendLog(`-> SUCCESS! Track: ${stream.getVideoTracks()[0].label}\n`);
+          
+          // Display the raw stream in the diagnostics UI for 3 seconds to test if it's black!
+          const rawVideo = document.getElementById('diagnostic-raw-video') as HTMLVideoElement;
+          if (rawVideo) {
+            rawVideo.srcObject = stream;
+            rawVideo.style.display = 'block';
+            await new Promise(r => setTimeout(r, 3000));
+            rawVideo.style.display = 'none';
+            rawVideo.srcObject = null;
+          }
+          
           stream.getTracks().forEach(t => t.stop());
           
           // Wait 500ms for Android Camera Driver to fully close before re-opening
@@ -430,6 +441,14 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
             <div className="flex-1 bg-black/40" />
           </div>
           <div className="flex-1 bg-black/40 flex flex-col items-center justify-end pb-6 pointer-events-auto gap-4">
+            <video 
+              id="diagnostic-raw-video" 
+              className="w-11/12 max-h-[150px] object-cover rounded-lg border border-red-500 bg-black" 
+              style={{ display: 'none' }} 
+              autoPlay 
+              playsInline 
+              muted 
+            />
             {diagnosticLog ? (
               <div className="bg-black/90 text-green-400 font-mono text-[10px] p-3 rounded-lg w-11/12 max-h-[150px] overflow-y-auto whitespace-pre-wrap text-left border border-white/20">
                 {diagnosticLog}
