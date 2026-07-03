@@ -64,7 +64,11 @@ export function BarcodeScanner({
 
       scanner.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: (viewfinderWidth, viewfinderHeight) => ({ width: Math.min(250, viewfinderWidth * 0.8), height: Math.min(150, viewfinderHeight * 0.8) }) },
+        { 
+          fps: 10, 
+          qrbox: { width: 250, height: 150 },
+          aspectRatio: 1.0 
+        },
         onDecodeSuccess,
         onDecodeError
       ).catch((err: any) => {
@@ -84,8 +88,8 @@ export function BarcodeScanner({
     };
 
     // Delay initialization to ensure the browser has painted the DOM and calculated 
-    // real CSS dimensions. Fixes "black screen" 0x0 video rendering on Android/Brave.
-    const timerId = setTimeout(initScanner, 150);
+    // real CSS dimensions. Increased to 400ms for slower mobile devices.
+    const timerId = setTimeout(initScanner, 400);
 
     return () => {
       isMounted = false;
@@ -127,7 +131,7 @@ export function BarcodeScanner({
     <div className="relative w-full overflow-hidden bg-black min-h-[300px]">
       <div 
         id={containerId} 
-        className="w-full"
+        className="w-full [&_video]:w-full [&_video]:h-full [&_video]:object-cover"
       />
       
       {/* Green flash overlay on detect */}
