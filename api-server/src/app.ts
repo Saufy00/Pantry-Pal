@@ -1,6 +1,7 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
@@ -42,7 +43,17 @@ app.use(
   }),
 );
 
-// 4. Rate Limiting (Removed due to Vercel req.ip proxy incompatibility)
+// 4. Rate Limiting (Safely restored for Vercel proxies)
+app.set("trust proxy", 1); // Trust Vercel's edge proxy so req.ip is populated
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: { error: "Too many requests from this IP, please try again after 15 minutes" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api", limiter);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

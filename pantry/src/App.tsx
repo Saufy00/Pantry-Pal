@@ -2,6 +2,9 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ErrorBoundary } from "react-error-boundary";
+import { AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Items from "@/pages/items";
@@ -66,6 +69,21 @@ function Router() {
   );
 }
 
+function ErrorFallback({ error, resetErrorBoundary }: any) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center space-y-4">
+      <AlertTriangle className="w-12 h-12 text-destructive" />
+      <h2 className="text-xl font-semibold text-foreground">Something went wrong</h2>
+      <p className="text-sm text-muted-foreground max-w-md bg-secondary/50 p-3 rounded-lg border border-border/30 overflow-auto break-all">
+        {error?.message || "An unexpected error occurred in the application UI."}
+      </p>
+      <Button onClick={resetErrorBoundary} variant="outline" className="mt-4 rounded-full">
+        Return Home
+      </Button>
+    </div>
+  );
+}
+
 /** Mounts background sync hooks once, inside the QueryClientProvider. */
 function AppServices() {
   useRealtimeSync();
@@ -79,7 +97,9 @@ function App() {
       <TooltipProvider>
         <AppServices />
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
+          <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.href = "/"}>
+            <Router />
+          </ErrorBoundary>
         </WouterRouter>
         <Toaster
           position="bottom-center"
