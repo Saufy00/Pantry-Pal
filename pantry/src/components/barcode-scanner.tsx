@@ -65,7 +65,7 @@ export function BarcodeScanner({
         }
         
         // 2. Identify potential back cameras. Put them at the front of the list.
-        const backCameras = videoDevices.filter(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('environment'));
+        const backCameras = videoDevices.filter(d => /back|rear|environment/i.test(d.label));
         const otherCameras = videoDevices.filter(d => !backCameras.includes(d));
         // Test back cameras first, then fallback to testing the rest
         const testQueue = [...backCameras, ...otherCameras];

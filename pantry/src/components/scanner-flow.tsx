@@ -53,7 +53,10 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
       ]) as MediaDeviceInfo[];
       
       const videoDevices = devices.filter(d => d.kind === 'videoinput');
-      appendLog(`-> Found ${videoDevices.length} cameras.\n`);
+      appendLog(`-> Found ${videoDevices.length} cameras.\n\n`);
+      videoDevices.forEach((d, i) => {
+        appendLog(`Camera ${i}\n${d.label || 'Unnamed Camera'}\nID: ${d.deviceId.slice(0,6)}...\n\n`);
+      });
 
       const testStream = async (name: string, constraints: any) => {
         appendLog(`\nTesting: ${name}\n`);
