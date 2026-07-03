@@ -56,19 +56,49 @@ export function BarcodeScanner({
       };
 
       try {
-        // Manually fetch cameras to bypass Android facingMode freeze
-        const devices = await Html5Qrcode.getCameras();
-        if (!devices || devices.length === 0) {
+        // 1. Get raw list of cameras using the native browser API
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        
+        if (videoDevices.length === 0) {
           throw new Error("No camera devices found.");
         }
         
-        // Try to find a back camera by label, otherwise default to the last camera (usually back on Android)
-        let backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('environment'));
-        if (!backCamera) backCamera = devices[devices.length - 1];
+        // 2. Identify potential back cameras. Put them at the front of the list.
+        const backCameras = videoDevices.filter(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('environment'));
+        const otherCameras = videoDevices.filter(d => !backCameras.includes(d));
+        // Test back cameras first, then fallback to testing the rest
+        const testQueue = [...backCameras, ...otherCameras];
         
-        // Pass the exact string ID, which bypasses the facingMode engine
+        let goldenDeviceId: string | null = null;
+        
+        // 3. The Aggressive Lock-Picker: Test each camera with a strict 1500ms timeout
+        for (const device of testQueue) {
+          try {
+            const stream = await Promise.race([
+              navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: device.deviceId } } }),
+              new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 1500))
+            ]) as MediaStream;
+            
+            // If it succeeds without hanging, this is our safe camera!
+            goldenDeviceId = device.deviceId;
+            
+            // Immediately release the hardware lock so Html5Qrcode can use it
+            stream.getTracks().forEach(t => t.stop());
+            break; 
+          } catch (probeErr) {
+            // It hung or failed. Ignore and move to the next lens.
+            continue;
+          }
+        }
+        
+        if (!goldenDeviceId) {
+          throw new Error("All cameras timed out or failed to initialize.");
+        }
+        
+        // 4. Safely initialize the scanner with the proven hardware ID
         await scanner.start(
-          backCamera.id,
+          goldenDeviceId,
           { 
             fps: 10, 
             qrbox: { width: 250, height: 150 },
