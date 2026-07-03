@@ -131,7 +131,7 @@ export function BarcodeScanner({
     <div className="relative w-full overflow-hidden bg-black min-h-[300px]">
       <div 
         id={containerId} 
-        className="w-full [&_video]:w-full [&_video]:h-full [&_video]:object-cover"
+        className="w-full [&_video]:w-full [&_video]:h-full [&_video]:object-cover [&_video]:absolute [&_video]:inset-0 [&_video]:!block [&_video]:!opacity-100 [&_video]:!visibility-visible"
       />
       
       {/* Green flash overlay on detect */}
