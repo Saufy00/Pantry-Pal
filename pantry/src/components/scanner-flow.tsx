@@ -40,42 +40,54 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
   const runDiagnostics = async () => {
     let log = "=== CAMERA DIAGNOSTICS ===\n";
     setDiagnosticLog(log);
-    
-    const appendLog = (msg: string) => {
-      log += msg;
-      setDiagnosticLog(log);
-    };
+    const appendLog = (msg: string) => { log += msg; setDiagnosticLog(log); };
 
     try {
       appendLog(`UA: ${navigator.userAgent.slice(0,40)}...\n`);
+      if (!navigator.mediaDevices) return appendLog("FATAL: mediaDevices missing.\n");
       
-      if (!navigator.mediaDevices) {
-        appendLog("FATAL: mediaDevices API missing.\n");
-        return;
-      }
-      
-      appendLog("1. Requesting enumerateDevices()...\n");
+      appendLog("1. enumerateDevices()...\n");
       const devices = await Promise.race([
         navigator.mediaDevices.enumerateDevices(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("enumerateDevices TIMEOUT (Blocked by Brave?)")), 3000))
+        new Promise((_, r) => setTimeout(() => r(new Error("TIMEOUT")), 3000))
       ]) as MediaDeviceInfo[];
       
       const videoDevices = devices.filter(d => d.kind === 'videoinput');
       appendLog(`-> Found ${videoDevices.length} cameras.\n`);
+
+      const testStream = async (name: string, constraints: any) => {
+        appendLog(`\nTesting: ${name}\n`);
+        try {
+          const stream = await Promise.race([
+            navigator.mediaDevices.getUserMedia(constraints),
+            new Promise((_, r) => setTimeout(() => r(new Error("TIMEOUT")), 2500))
+          ]) as MediaStream;
+          appendLog(`-> SUCCESS! Track: ${stream.getVideoTracks()[0].label}\n`);
+          stream.getTracks().forEach(t => t.stop());
+          return true;
+        } catch (err: any) {
+          appendLog(`-> FAILED: ${err.message}\n`);
+          return false;
+        }
+      };
+
+      // Test 1: The standard environment camera (This is what html5-qrcode uses and what hung previously)
+      const test1 = await testStream("facingMode: environment", { video: { facingMode: 'environment' } });
       
-      appendLog(`2. Requesting getUserMedia()...\n`);
-      const stream = await Promise.race([
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("getUserMedia TIMEOUT (Blocked by Brave?)")), 3000))
-      ]) as MediaStream;
+      // Test 2: The most basic video request (If this works, the problem is facingMode)
+      if (!test1) {
+        const test2 = await testStream("video: true (Basic)", { video: true });
+        
+        // Test 3: Force select the last camera device ID (usually the main back camera on Android)
+        if (!test2 && videoDevices.length > 0) {
+           const lastCamId = videoDevices[videoDevices.length - 1].deviceId;
+           await testStream(`Exact ID (${lastCamId.slice(0,4)}...)`, { video: { deviceId: { exact: lastCamId } } });
+        }
+      }
       
-      const track = stream.getVideoTracks()[0];
-      appendLog(`-> Success! Track: ${track.label}\n`);
-      
-      stream.getTracks().forEach(t => t.stop());
-      appendLog(`Test complete.`);
+      appendLog(`\nTests complete.`);
     } catch (err: any) {
-      appendLog(`\n[!] ERROR: ${err.name || 'Error'}\n[!] MSG: ${err.message}\n`);
+      appendLog(`\n[!] FATAL: ${err.message}\n`);
     }
   };
   
