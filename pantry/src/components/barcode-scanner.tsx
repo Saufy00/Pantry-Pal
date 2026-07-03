@@ -64,11 +64,25 @@ export function BarcodeScanner({
           throw new Error("No camera devices found.");
         }
         
-        // 2. Identify potential back cameras. Put them at the front of the list.
-        const backCameras = videoDevices.filter(d => /back|rear|environment/i.test(d.label));
-        const otherCameras = videoDevices.filter(d => !backCameras.includes(d));
-        // Test back cameras first, then fallback to testing the rest
-        const testQueue = [...backCameras, ...otherCameras];
+        // 2. Intelligently sort cameras. Android scrambles the list and puts crashing depth sensors first.
+        // We want to prioritize "camera 0, facing back" (the primary lens).
+        const getCameraScore = (label: string) => {
+          const lower = label.toLowerCase();
+          if (lower.includes('front')) return -100; // Deprioritize front cameras
+          
+          let score = 0;
+          if (lower.includes('back') || lower.includes('environment') || lower.includes('rear')) score += 50;
+          
+          // Extract the camera number (e.g. "camera 0") and prefer the lowest number
+          const match = lower.match(/camera\s*(\d+)/);
+          if (match) {
+            const num = parseInt(match[1], 10);
+            score += (20 - num); // camera 0 gets +20, camera 1 gets +19
+          }
+          return score;
+        };
+        
+        const testQueue = [...videoDevices].sort((a, b) => getCameraScore(b.label) - getCameraScore(a.label));
         
         let goldenDeviceId: string | null = null;
         
