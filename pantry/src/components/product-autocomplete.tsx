@@ -9,6 +9,7 @@ interface ProductAutocompleteProps {
   onSelectProduct: (product: Product) => void;
   placeholder?: string;
   id?: string;
+  name?: string;
   required?: boolean;
 }
 
@@ -18,6 +19,7 @@ export function ProductAutocomplete({
   onSelectProduct,
   placeholder,
   id,
+  name,
   required,
 }: ProductAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -119,6 +121,7 @@ export function ProductAutocomplete({
     <div ref={containerRef} className="relative w-full">
       <Input
         id={id}
+        name={name}
         placeholder={placeholder}
         value={value}
         onChange={handleInputChange}
