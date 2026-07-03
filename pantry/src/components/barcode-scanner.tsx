@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { triggerHaptic } from "@/utils/scan-feedback";
+import { SwitchCamera } from "lucide-react";
 
 export type ScanError = {
   type: "permission_denied" | "camera_unavailable" | "camera_in_use" | "unknown";
@@ -24,17 +25,19 @@ export function BarcodeScanner({
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isProcessingRef = useRef<boolean>(false);
   const [flash, setFlash] = useState(false);
+  
+  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
+  const [cameraIndex, setCameraIndex] = useState(0);
+  const [isSwitching, setIsSwitching] = useState(false);
 
-  // Stable refs for callbacks so the camera effect doesn't re-fire
   const onScanRef = useRef(onScan);
   onScanRef.current = onScan;
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
 
-  // Initialize and cleanup camera — only depends on `active`
+  // Initialize camera
   useEffect(() => {
     if (!active) return;
-
     let isMounted = true;
     let scanner: Html5Qrcode | null = null;
 
@@ -46,137 +49,98 @@ export function BarcodeScanner({
 
       const onDecodeSuccess = (decodedText: string) => {
         if (isProcessingRef.current || scannerRef.current?.getState() === 3) return;
-        
         isProcessingRef.current = true;
         setFlash(true);
         setTimeout(() => setFlash(false), 300);
         triggerHaptic(50);
-        
         onScanRef.current(decodedText);
       };
 
       try {
-        // 1. Get raw list of cameras using the native browser API
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        let queue = availableCameras;
         
-        if (videoDevices.length === 0) {
-          throw new Error("No camera devices found.");
-        }
-        
-        // 2. Intelligently sort cameras. Android scrambles the list and puts crashing depth sensors first.
-        // We want to prioritize "camera 0, facing back" (the primary lens).
-        const getCameraScore = (label: string) => {
-          const lower = label.toLowerCase();
-          if (lower.includes('front')) return -100; // Deprioritize front cameras
+        // Fetch and sort cameras on first load
+        if (queue.length === 0) {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoDevices = devices.filter(d => d.kind === 'videoinput');
+          if (videoDevices.length === 0) throw new Error("No camera devices found.");
           
-          let score = 0;
-          if (lower.includes('back') || lower.includes('environment') || lower.includes('rear')) score += 50;
+          const getCameraScore = (label: string) => {
+            const lower = label.toLowerCase();
+            if (lower.includes('front')) return -100;
+            let score = 0;
+            if (lower.includes('back') || lower.includes('environment') || lower.includes('rear')) score += 50;
+            const match = lower.match(/camera\s*(\d+)/);
+            if (match) score += (20 - parseInt(match[1], 10));
+            return score;
+          };
           
-          // Extract the camera number (e.g. "camera 0") and prefer the lowest number
-          const match = lower.match(/camera\s*(\d+)/);
-          if (match) {
-            const num = parseInt(match[1], 10);
-            score += (20 - num); // camera 0 gets +20, camera 1 gets +19
-          }
-          return score;
-        };
-        
-        const testQueue = [...videoDevices].sort((a, b) => getCameraScore(b.label) - getCameraScore(a.label));
-        
-        let goldenDeviceId: string | null = null;
-        
-        // 3. The Aggressive Lock-Picker: Test each camera with a strict 1500ms timeout
-        for (const device of testQueue) {
-          try {
-            const stream = await Promise.race([
-              navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: device.deviceId } } }),
-              new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 1500))
-            ]) as MediaStream;
-            
-            // If it succeeds without hanging, this is our safe camera!
-            goldenDeviceId = device.deviceId;
-            
-            // Immediately release the hardware lock so Html5Qrcode can use it
-            stream.getTracks().forEach(t => t.stop());
-            
-            // Wait 500ms for Android Camera Driver to fully close before re-opening
-            await new Promise(r => setTimeout(r, 500));
-            break; 
-          } catch (probeErr) {
-            // It hung or failed. Ignore and move to the next lens.
-            continue;
-          }
+          queue = [...videoDevices].sort((a, b) => getCameraScore(b.label) - getCameraScore(a.label));
+          setAvailableCameras(queue);
         }
         
-        if (!goldenDeviceId) {
-          throw new Error("All cameras timed out or failed to initialize.");
-        }
+        const targetCamera = queue[cameraIndex];
+        if (!targetCamera) throw new Error("Target camera index out of bounds");
+
+        // Briefly test the hardware lock (avoids driver crashes on bad lenses)
+        const stream = await Promise.race([
+          navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: targetCamera.deviceId } } }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 1500))
+        ]) as MediaStream;
         
-        // 4. Safely initialize the scanner with the proven hardware ID
+        stream.getTracks().forEach(t => t.stop());
+        await new Promise(r => setTimeout(r, 500));
+        
+        if (!isMounted) return;
+
         await scanner.start(
-          goldenDeviceId,
-          { 
-            fps: 10, 
-            qrbox: { width: 250, height: 150 },
-            aspectRatio: 1.0 
-          },
+          targetCamera.deviceId,
+          { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.0 },
           onDecodeSuccess,
-          () => {} // silent on per-frame decode errors
+          () => {} 
         );
+        setIsSwitching(false);
       } catch (err: any) {
+        setIsSwitching(false);
         const cb = onErrorRef.current;
         if (!cb) return;
-        const errorMsg = err?.toString().toLowerCase() || "";
-        if (errorMsg.includes("notallowederror") || errorMsg.includes("permission denied")) {
-          cb({ type: "permission_denied", message: "Camera permission denied." });
-        } else if (errorMsg.includes("notfounderror") || errorMsg.includes("no camera") || errorMsg.includes("device not found")) {
-          cb({ type: "camera_unavailable", message: "No camera found." });
-        } else if (errorMsg.includes("notreadableerror") || errorMsg.includes("in use")) {
-          cb({ type: "camera_in_use", message: "Camera is already in use by another application." });
-        } else {
-          cb({ type: "unknown", message: err?.message || "Failed to initialize camera." });
-        }
+        cb({ type: "unknown", message: err?.message || "Failed to initialize camera." });
       }
     };
 
-    // Delay initialization to ensure the browser has painted the DOM and calculated 
-    // real CSS dimensions. Increased to 400ms for slower mobile devices.
     const timerId = setTimeout(initScanner, 400);
 
     return () => {
       isMounted = false;
       clearTimeout(timerId);
-      
       if (scanner && scanner.isScanning) {
-        scanner.stop().catch(console.error).finally(() => {
-          scanner?.clear();
-        });
+        scanner.stop().catch(console.error).finally(() => scanner?.clear());
       } else if (scanner) {
         scanner.clear();
       }
       scannerRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+  }, [active, cameraIndex]); // Re-run when cameraIndex changes
 
-  // Handle paused state (freeze/resume)
   useEffect(() => {
     if (!scannerRef.current || !active) return;
-
-    // Html5Qrcode states: 1 = NOT_STARTED, 2 = SCANNING, 3 = PAUSED
     const state = scannerRef.current.getState();
-
     if (paused && state === 2) {
-      scannerRef.current.pause(true); // true = freeze camera view
+      scannerRef.current.pause(true);
     } else if (!paused && state === 3) {
       isProcessingRef.current = false;
       scannerRef.current.resume();
     } else if (!paused && state === 2) {
-      // Just clear the lock if we are unpaused and already scanning
       isProcessingRef.current = false;
     }
   }, [paused, active]);
+
+  const cycleCamera = () => {
+    if (availableCameras.length <= 1 || isSwitching) return;
+    setIsSwitching(true);
+    setCameraIndex((prev) => (prev + 1) % availableCameras.length);
+  };
 
   if (!active) return null;
 
@@ -184,18 +148,21 @@ export function BarcodeScanner({
     <div className="relative w-full overflow-hidden bg-black min-h-[300px]">
       <div 
         id={containerId} 
-        className="w-full [&_video]:w-full [&_video]:h-full [&_video]:object-cover [&_video]:absolute [&_video]:inset-0 [&_video]:!block [&_video]:!opacity-100 [&_video]:!visibility-visible"
+        className={`w-full [&_video]:w-full [&_video]:h-full [&_video]:object-cover [&_video]:absolute [&_video]:inset-0 [&_video]:!block [&_video]:!opacity-100 [&_video]:!visibility-visible transition-opacity duration-300 ${isSwitching ? 'opacity-0' : 'opacity-100'}`}
       />
       
-      {/* Green flash overlay on detect */}
-      {flash && (
-        <div className="absolute inset-0 border-4 border-green-500 rounded-xl transition-opacity duration-300 pointer-events-none opacity-100 z-10" />
+      {availableCameras.length > 1 && (
+        <button
+          onClick={cycleCamera}
+          disabled={isSwitching}
+          className="absolute top-4 right-4 z-20 bg-black/60 text-white p-3 rounded-full backdrop-blur-sm border border-white/20 shadow-xl active:scale-95 transition-transform"
+        >
+          <SwitchCamera className={`w-5 h-5 ${isSwitching ? 'animate-spin' : ''}`} />
+        </button>
       )}
       
-      {/* Dimmed overlay when paused */}
-      {paused && (
-        <div className="absolute inset-0 bg-black/40 transition-opacity duration-300 z-10 pointer-events-none" />
-      )}
+      {flash && <div className="absolute inset-0 border-4 border-green-500 rounded-xl pointer-events-none opacity-100 z-10" />}
+      {paused && <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />}
     </div>
   );
 }
