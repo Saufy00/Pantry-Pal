@@ -34,7 +34,6 @@ type ScannerState =
 
 export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps) {
   const [state, setState] = useState<ScannerState>({ phase: "idle" });
-  const [showMobileWall, setShowMobileWall] = useState(false);
   const [isQuickAdding, setIsQuickAdding] = useState(false);
   
   const queryClient = useQueryClient();
@@ -321,34 +320,13 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
       <>
         <Button 
           type="button"
-          onClick={() => {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            if (isMobile) {
-              setShowMobileWall(true);
-            } else {
-              setState({ phase: "scanning" });
-            }
-          }} 
+          onClick={() => setState({ phase: "scanning" })} 
           className="w-full py-8 border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-all rounded-xl text-primary flex flex-col gap-2 h-auto"
           variant="outline"
         >
           <Camera className="w-6 h-6" />
           <span className="font-semibold">Scan Barcode</span>
         </Button>
-
-        <AlertDialog open={showMobileWall} onOpenChange={setShowMobileWall}>
-          <AlertDialogContent className="rounded-2xl max-w-[340px]">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-xl">Mobile Scanning In Progress</AlertDialogTitle>
-              <AlertDialogDescription className="text-base text-muted-foreground mt-2">
-                We're currently optimizing the barcode scanner hardware integration for mobile devices. Please add items manually for now while we perfect the mobile camera experience.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="mt-4">
-              <AlertDialogAction className="rounded-xl w-full" onClick={() => setShowMobileWall(false)}>Got it</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </>
     );
   }
