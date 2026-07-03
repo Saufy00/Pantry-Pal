@@ -35,89 +35,6 @@ type ScannerState =
 export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps) {
   const [state, setState] = useState<ScannerState>({ phase: "idle" });
   const [isQuickAdding, setIsQuickAdding] = useState(false);
-  const [diagnosticLog, setDiagnosticLog] = useState<string | null>(null);
-
-  const runDiagnostics = async () => {
-    let log = "=== CAMERA DIAGNOSTICS ===\n";
-    setDiagnosticLog(log);
-    const appendLog = (msg: string) => { log += msg; setDiagnosticLog(log); };
-
-    try {
-      appendLog(`UA: ${navigator.userAgent.slice(0,40)}...\n`);
-      if (!navigator.mediaDevices) return appendLog("FATAL: mediaDevices missing.\n");
-      
-      appendLog("1. enumerateDevices()...\n");
-      const devices = await Promise.race([
-        navigator.mediaDevices.enumerateDevices(),
-        new Promise((_, r) => setTimeout(() => r(new Error("TIMEOUT")), 3000))
-      ]) as MediaDeviceInfo[];
-      
-      const videoDevices = devices.filter(d => d.kind === 'videoinput');
-      
-      const getScore = (l: string) => {
-        let s = 0; const lower = l.toLowerCase();
-        if (lower.includes('front')) return -100;
-        if (/back|rear|environment/.test(lower)) s += 50;
-        const m = lower.match(/camera\s*(\d+)/);
-        if (m) s += (20 - parseInt(m[1], 10));
-        return s;
-      };
-      const sortedDevices = [...videoDevices].sort((a, b) => getScore(b.label) - getScore(a.label));
-      
-      appendLog(`-> Found ${videoDevices.length} cameras. Sorted Queue:\n\n`);
-      sortedDevices.forEach((d, i) => {
-        appendLog(`[Queue ${i}] ${d.label || 'Unnamed'}\nID: ${d.deviceId.slice(0,6)}...\n\n`);
-      });
-
-      const testStream = async (name: string, constraints: any) => {
-        appendLog(`\nTesting: ${name}\n`);
-        try {
-          const stream = await Promise.race([
-            navigator.mediaDevices.getUserMedia(constraints),
-            new Promise((_, r) => setTimeout(() => r(new Error("TIMEOUT")), 2500))
-          ]) as MediaStream;
-          appendLog(`-> SUCCESS! Track: ${stream.getVideoTracks()[0].label}\n`);
-          
-          // Display the raw stream in the diagnostics UI for 3 seconds to test if it's black!
-          const rawVideo = document.getElementById('diagnostic-raw-video') as HTMLVideoElement;
-          if (rawVideo) {
-            rawVideo.srcObject = stream;
-            rawVideo.style.display = 'block';
-            await new Promise(r => setTimeout(r, 3000));
-            rawVideo.style.display = 'none';
-            rawVideo.srcObject = null;
-          }
-          
-          stream.getTracks().forEach(t => t.stop());
-          
-          // Wait 500ms for Android Camera Driver to fully close before re-opening
-          await new Promise(r => setTimeout(r, 500));
-          return true;
-        } catch (err: any) {
-          appendLog(`-> FAILED: ${err.message}\n`);
-          return false;
-        }
-      };
-
-      // Test 1: The standard environment camera (This is what html5-qrcode uses and what hung previously)
-      const test1 = await testStream("facingMode: environment", { video: { facingMode: 'environment' } });
-      
-      // Test 2: The most basic video request (If this works, the problem is facingMode)
-      if (!test1) {
-        const test2 = await testStream("video: true (Basic)", { video: true });
-        
-        // Test 3: Force select the last camera device ID (usually the main back camera on Android)
-        if (!test2 && videoDevices.length > 0) {
-           const lastCamId = videoDevices[videoDevices.length - 1].deviceId;
-           await testStream(`Exact ID (${lastCamId.slice(0,4)}...)`, { video: { deviceId: { exact: lastCamId } } });
-        }
-      }
-      
-      appendLog(`\nTests complete.`);
-    } catch (err: any) {
-      appendLog(`\n[!] FATAL: ${err.message}\n`);
-    }
-  };
   
   const queryClient = useQueryClient();
   const createProductMutation = useCreateProduct();
@@ -440,41 +357,15 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
             </div>
             <div className="flex-1 bg-black/40" />
           </div>
-          <div className="flex-1 bg-black/40 flex flex-col items-center justify-end pb-6 pointer-events-auto gap-4">
-            <video 
-              id="diagnostic-raw-video" 
-              className="w-11/12 max-h-[150px] object-cover rounded-lg border border-red-500 bg-black" 
-              style={{ display: 'none' }} 
-              autoPlay 
-              playsInline 
-              muted 
-            />
-            {diagnosticLog ? (
-              <div className="bg-black/90 text-green-400 font-mono text-[10px] p-3 rounded-lg w-11/12 max-h-[150px] overflow-y-auto whitespace-pre-wrap text-left border border-white/20">
-                {diagnosticLog}
-              </div>
-            ) : null}
-            <div className="flex gap-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full shadow-xl gap-2 text-xs font-medium bg-black/50 border-white/20 text-white hover:bg-black/80"
-                onClick={runDiagnostics}
-              >
-                <AlertCircle className="w-3 h-3 text-yellow-400" /> Diagnose
-              </Button>
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                className="rounded-full shadow-xl gap-2 text-xs font-medium"
-                onClick={() => {
-                  setDiagnosticLog(null);
-                  setState({ phase: "idle" });
-                }}
-              >
-                <X className="w-3 h-3" /> Cancel
-              </Button>
-            </div>
+          <div className="flex-1 bg-black/40 flex items-end justify-center pb-6 pointer-events-auto">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="rounded-full shadow-xl gap-2 text-xs font-medium"
+              onClick={() => setState({ phase: "idle" })}
+            >
+              <X className="w-3 h-3" /> Cancel
+            </Button>
           </div>
         </div>
       )}
