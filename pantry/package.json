@@ -48,7 +48,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
-    "html5-qrcode": "^2.3.8",
+    "@zxing/library": "^0.23.0",
     "react-error-boundary": "^6.1.2"
   }
 }

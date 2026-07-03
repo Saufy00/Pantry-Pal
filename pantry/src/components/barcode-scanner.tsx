@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import { BrowserMultiFormatReader, NotFoundException } from "@zxing/library";
 import { triggerHaptic } from "@/utils/scan-feedback";
 import { SwitchCamera } from "lucide-react";
 
@@ -21,11 +21,11 @@ export function BarcodeScanner({
   paused = false, 
   active = true 
 }: BarcodeScannerProps) {
-  const containerId = "barcode-reader-internal";
-  const scannerRef = useRef<Html5Qrcode | null>(null);
-  const isProcessingRef = useRef<boolean>(false);
-  const [flash, setFlash] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   
+  const [flash, setFlash] = useState(false);
   const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
   const [cameraIndex, setCameraIndex] = useState(0);
   const [isSwitching, setIsSwitching] = useState(false);
@@ -34,32 +34,32 @@ export function BarcodeScanner({
   onScanRef.current = onScan;
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
 
-  // Initialize camera
+  const stopStream = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
   useEffect(() => {
     if (!active) return;
     let isMounted = true;
-    let scanner: Html5Qrcode | null = null;
+    
+    if (!codeReaderRef.current) {
+      codeReaderRef.current = new BrowserMultiFormatReader();
+    }
 
-    const initScanner = async () => {
+    const initCamera = async () => {
       if (!isMounted) return;
-      
-      scanner = new Html5Qrcode(containerId);
-      scannerRef.current = scanner;
-
-      const onDecodeSuccess = (decodedText: string) => {
-        if (isProcessingRef.current || scannerRef.current?.getState() === 3) return;
-        isProcessingRef.current = true;
-        setFlash(true);
-        setTimeout(() => setFlash(false), 300);
-        triggerHaptic(50);
-        onScanRef.current(decodedText);
-      };
-
       try {
         let queue = availableCameras;
         
-        // Fetch and sort cameras on first load
         if (queue.length === 0) {
           const devices = await navigator.mediaDevices.enumerateDevices();
           const videoDevices = devices.filter(d => d.kind === 'videoinput');
@@ -78,67 +78,90 @@ export function BarcodeScanner({
           queue = [...videoDevices].sort((a, b) => getCameraScore(b.label) - getCameraScore(a.label));
           setAvailableCameras(queue);
         }
-        
-        const targetCamera = queue[cameraIndex];
-        if (!targetCamera) throw new Error("Target camera index out of bounds");
 
-        // Briefly test the hardware lock (avoids driver crashes on bad lenses)
+        const targetCamera = queue[cameraIndex];
+        if (!targetCamera) throw new Error("Camera index out of bounds");
+
         const stream = await Promise.race([
-          navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: targetCamera.deviceId } } }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 1500))
+          navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              deviceId: { exact: targetCamera.deviceId },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            } 
+          }),
+          new Promise((_, r) => setTimeout(() => r(new Error("Camera initialization timed out (Driver freeze)")), 2000))
         ]) as MediaStream;
         
-        stream.getTracks().forEach(t => t.stop());
-        await new Promise(r => setTimeout(r, 500));
-        
-        if (!isMounted) return;
+        if (!isMounted) {
+          stream.getTracks().forEach(t => t.stop());
+          return;
+        }
 
-        await scanner.start(
-          targetCamera.deviceId,
-          { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.0 },
-          onDecodeSuccess,
-          () => {} 
-        );
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play().catch(() => {});
+        }
+
         setIsSwitching(false);
+
+        const scanLoop = async () => {
+          if (!isMounted || !videoRef.current) return;
+          if (!pausedRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+            try {
+              const result = await codeReaderRef.current?.decodeFromVideoElement(videoRef.current);
+              if (result && !pausedRef.current) {
+                setFlash(true);
+                setTimeout(() => setFlash(false), 300);
+                triggerHaptic(50);
+                onScanRef.current(result.getText());
+              }
+            } catch (err) {
+              if (!(err instanceof NotFoundException)) {
+                // Ignore silent parsing errors on bad frames
+              }
+            }
+          }
+          setTimeout(scanLoop, 250); // Scan every 250ms (4 FPS) to save battery and avoid lockups
+        };
+
+        scanLoop();
       } catch (err: any) {
         setIsSwitching(false);
         const cb = onErrorRef.current;
         if (!cb) return;
-        cb({ type: "unknown", message: err?.message || "Failed to initialize camera." });
+        const msg = err?.message?.toLowerCase() || "";
+        if (msg.includes("not allowed") || msg.includes("permission denied")) {
+          cb({ type: "permission_denied", message: "Camera permission denied." });
+        } else if (msg.includes("not readable") || msg.includes("in use") || msg.includes("concurrent")) {
+          cb({ type: "camera_in_use", message: "Camera is busy or releasing lock. Please try again." });
+        } else {
+          cb({ type: "unknown", message: err?.message || "Failed to initialize camera." });
+        }
       }
     };
 
-    const timerId = setTimeout(initScanner, 400);
+    // Small delay before init to prevent concurrent access on fast mounts
+    const timerId = setTimeout(initCamera, 200);
 
     return () => {
       isMounted = false;
       clearTimeout(timerId);
-      if (scanner && scanner.isScanning) {
-        scanner.stop().catch(console.error).finally(() => scanner?.clear());
-      } else if (scanner) {
-        scanner.clear();
-      }
-      scannerRef.current = null;
+      stopStream();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, cameraIndex]); // Re-run when cameraIndex changes
+  }, [active, cameraIndex]);
 
-  useEffect(() => {
-    if (!scannerRef.current || !active) return;
-    const state = scannerRef.current.getState();
-    if (paused && state === 2) {
-      scannerRef.current.pause(true);
-    } else if (!paused && state === 3) {
-      isProcessingRef.current = false;
-      scannerRef.current.resume();
-    } else if (!paused && state === 2) {
-      isProcessingRef.current = false;
-    }
-  }, [paused, active]);
-
-  const cycleCamera = () => {
+  const cycleCamera = async () => {
     if (availableCameras.length <= 1 || isSwitching) return;
     setIsSwitching(true);
+    
+    stopStream();
+    
+    // CRITICAL: Wait 750ms for Android driver to safely release the hardware lens 
+    await new Promise(r => setTimeout(r, 750));
+    
     setCameraIndex((prev) => (prev + 1) % availableCameras.length);
   };
 
@@ -146,23 +169,36 @@ export function BarcodeScanner({
 
   return (
     <div className="relative w-full overflow-hidden bg-black min-h-[300px]">
-      <div 
-        id={containerId} 
-        className={`w-full [&_video]:w-full [&_video]:h-full [&_video]:object-cover [&_video]:absolute [&_video]:inset-0 [&_video]:!block [&_video]:!opacity-100 [&_video]:!visibility-visible transition-opacity duration-300 ${isSwitching ? 'opacity-0' : 'opacity-100'}`}
+      <video 
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ${isSwitching ? 'opacity-0' : 'opacity-100'}`}
       />
+      
+      {/* Target Box Overlay */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+         <div className="w-[250px] h-[150px] border-2 border-white/20 rounded-xl relative">
+            <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-green-500 rounded-tl-lg" />
+            <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-green-500 rounded-tr-lg" />
+            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-green-500 rounded-bl-lg" />
+            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-green-500 rounded-br-lg" />
+         </div>
+      </div>
       
       {availableCameras.length > 1 && (
         <button
           onClick={cycleCamera}
           disabled={isSwitching}
-          className="absolute top-4 right-4 z-20 bg-black/60 text-white p-3 rounded-full backdrop-blur-sm border border-white/20 shadow-xl active:scale-95 transition-transform"
+          className="absolute top-4 right-4 z-20 bg-black/60 text-white p-3 rounded-full backdrop-blur-sm border border-white/20 shadow-xl active:scale-95 transition-transform disabled:opacity-50"
         >
           <SwitchCamera className={`w-5 h-5 ${isSwitching ? 'animate-spin' : ''}`} />
         </button>
       )}
       
       {flash && <div className="absolute inset-0 border-4 border-green-500 rounded-xl pointer-events-none opacity-100 z-10" />}
-      {paused && <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />}
+      {paused && <div className="absolute inset-0 bg-black/60 z-10 pointer-events-none backdrop-blur-sm" />}
     </div>
   );
 }
