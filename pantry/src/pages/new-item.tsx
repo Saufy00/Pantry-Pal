@@ -155,6 +155,7 @@ export default function NewItem() {
                 setName(product.name);
                 if (product.category) setCategory(product.category);
               }}
+              name="name"
               required
             />
           </div>
@@ -166,6 +167,7 @@ export default function NewItem() {
             </Label>
             <Input
               id="category"
+              name="category"
               placeholder="e.g. Cooking, Snacks, Cleaning"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -178,6 +180,7 @@ export default function NewItem() {
             <Label htmlFor="location">Location</Label>
             <Input
               id="location"
+              name="location"
               placeholder="e.g. Pantry, Fridge, Bathroom"
               value={location}
               onChange={(e) => setLocationVal(e.target.value)}
@@ -188,6 +191,7 @@ export default function NewItem() {
           <div className="space-y-2">
             <Label>Status</Label>
             <Select
+              name="status"
               value={status}
               onValueChange={(v) => setStatus(v as StatusValue)}
             >
@@ -208,6 +212,7 @@ export default function NewItem() {
               <Label htmlFor="quantity">Quantity</Label>
               <Input
                 id="quantity"
+                name="quantity"
                 type="number"
                 min="0"
                 step="any"
@@ -220,6 +225,7 @@ export default function NewItem() {
               <Label htmlFor="unit">Unit</Label>
               <Input
                 id="unit"
+                name="unit"
                 placeholder="e.g. kg, bottles"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
@@ -229,6 +235,7 @@ export default function NewItem() {
               <Label htmlFor="minThreshold">Min Threshold</Label>
               <Input
                 id="minThreshold"
+                name="minThreshold"
                 type="number"
                 min="0"
                 step="1"
@@ -274,6 +281,7 @@ export default function NewItem() {
             <Label htmlFor="notes">Notes</Label>
             <textarea
               id="notes"
+              name="notes"
               placeholder="Optional notes…"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
