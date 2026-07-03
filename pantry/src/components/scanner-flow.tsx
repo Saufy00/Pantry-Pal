@@ -53,9 +53,20 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
       ]) as MediaDeviceInfo[];
       
       const videoDevices = devices.filter(d => d.kind === 'videoinput');
-      appendLog(`-> Found ${videoDevices.length} cameras.\n\n`);
-      videoDevices.forEach((d, i) => {
-        appendLog(`Camera ${i}\n${d.label || 'Unnamed Camera'}\nID: ${d.deviceId.slice(0,6)}...\n\n`);
+      
+      const getScore = (l: string) => {
+        let s = 0; const lower = l.toLowerCase();
+        if (lower.includes('front')) return -100;
+        if (/back|rear|environment/.test(lower)) s += 50;
+        const m = lower.match(/camera\s*(\d+)/);
+        if (m) s += (20 - parseInt(m[1], 10));
+        return s;
+      };
+      const sortedDevices = [...videoDevices].sort((a, b) => getScore(b.label) - getScore(a.label));
+      
+      appendLog(`-> Found ${videoDevices.length} cameras. Sorted Queue:\n\n`);
+      sortedDevices.forEach((d, i) => {
+        appendLog(`[Queue ${i}] ${d.label || 'Unnamed'}\nID: ${d.deviceId.slice(0,6)}...\n\n`);
       });
 
       const testStream = async (name: string, constraints: any) => {
@@ -67,6 +78,9 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
           ]) as MediaStream;
           appendLog(`-> SUCCESS! Track: ${stream.getVideoTracks()[0].label}\n`);
           stream.getTracks().forEach(t => t.stop());
+          
+          // Wait 500ms for Android Camera Driver to fully close before re-opening
+          await new Promise(r => setTimeout(r, 500));
           return true;
         } catch (err: any) {
           appendLog(`-> FAILED: ${err.message}\n`);

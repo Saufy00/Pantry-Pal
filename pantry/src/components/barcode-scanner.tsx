@@ -99,6 +99,9 @@ export function BarcodeScanner({
             
             // Immediately release the hardware lock so Html5Qrcode can use it
             stream.getTracks().forEach(t => t.stop());
+            
+            // Wait 500ms for Android Camera Driver to fully close before re-opening
+            await new Promise(r => setTimeout(r, 500));
             break; 
           } catch (probeErr) {
             // It hung or failed. Ignore and move to the next lens.
