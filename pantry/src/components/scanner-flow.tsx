@@ -35,6 +35,45 @@ type ScannerState =
 export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps) {
   const [state, setState] = useState<ScannerState>({ phase: "idle" });
   const [isQuickAdding, setIsQuickAdding] = useState(false);
+  const [diagnosticLog, setDiagnosticLog] = useState<string | null>(null);
+
+  const runDiagnostics = async () => {
+    setDiagnosticLog("Running diagnostics...");
+    let log = "=== CAMERA DIAGNOSTICS ===\n\n";
+    try {
+      log += `UserAgent: ${navigator.userAgent}\n`;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        log += "FATAL: navigator.mediaDevices API not supported (Check HTTPS / Secure Context).\n";
+        setDiagnosticLog(log);
+        return;
+      }
+      
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(d => d.kind === 'videoinput');
+      log += `Found ${videoDevices.length} camera(s):\n`;
+      videoDevices.forEach((d, i) => {
+        log += `[${i}] ${d.label || 'Unnamed Camera'} (ID: ${d.deviceId.slice(0,6)}...)\n`;
+      });
+      
+      log += `\nTesting raw getUserMedia({ video: { facingMode: 'environment' } })...\n`;
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const track = stream.getVideoTracks()[0];
+      log += `Success! Track: ${track.label}\n`;
+      const settings = track.getSettings();
+      log += `Resolution: ${settings.width}x${settings.height}\n`;
+      log += `FrameRate: ${settings.frameRate}\n`;
+      log += `Aspect Ratio: ${settings.aspectRatio}\n`;
+      
+      stream.getTracks().forEach(t => t.stop());
+      log += `\nTest complete. Stream closed.`;
+    } catch (err: any) {
+      log += `\nERROR: ${err.name}\nMESSAGE: ${err.message}\n`;
+      if (err.name === 'NotAllowedError') log += "-> Camera permission denied by browser or Shields.\n";
+      if (err.name === 'NotFoundError') log += "-> No camera matching constraints found.\n";
+      if (err.name === 'NotReadableError') log += "-> Camera is currently in use by another app/tab.\n";
+    }
+    setDiagnosticLog(log);
+  };
   
   const queryClient = useQueryClient();
   const createProductMutation = useCreateProduct();
@@ -357,15 +396,33 @@ export function ScannerFlow({ onProductSelected, onQuickAdd }: ScannerFlowProps)
             </div>
             <div className="flex-1 bg-black/40" />
           </div>
-          <div className="flex-1 bg-black/40 flex items-end justify-center pb-6 pointer-events-auto">
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              className="rounded-full shadow-xl gap-2 text-xs font-medium"
-              onClick={() => setState({ phase: "idle" })}
-            >
-              <X className="w-3 h-3" /> Cancel
-            </Button>
+          <div className="flex-1 bg-black/40 flex flex-col items-center justify-end pb-6 pointer-events-auto gap-4">
+            {diagnosticLog ? (
+              <div className="bg-black/90 text-green-400 font-mono text-[10px] p-3 rounded-lg w-11/12 max-h-[150px] overflow-y-auto whitespace-pre-wrap text-left border border-white/20">
+                {diagnosticLog}
+              </div>
+            ) : null}
+            <div className="flex gap-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-full shadow-xl gap-2 text-xs font-medium bg-black/50 border-white/20 text-white hover:bg-black/80"
+                onClick={runDiagnostics}
+              >
+                <AlertCircle className="w-3 h-3 text-yellow-400" /> Diagnose
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="rounded-full shadow-xl gap-2 text-xs font-medium"
+                onClick={() => {
+                  setDiagnosticLog(null);
+                  setState({ phase: "idle" });
+                }}
+              >
+                <X className="w-3 h-3" /> Cancel
+              </Button>
+            </div>
           </div>
         </div>
       )}
